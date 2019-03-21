@@ -35,7 +35,7 @@ namespace Indexer.Tests
             File.WriteAllLines(this.testFilePath, new[] { line });
             var simpleSearcher = new SimpleSearcher(this.pathToFiles);
 
-            var results = simpleSearcher.FindString("line.");
+            var results = simpleSearcher.Find("line.");
 
             results.Count.Should().Be(1);
             var result = results.Single();
@@ -50,14 +50,22 @@ namespace Indexer.Tests
             const string line = "simple line. line.";
             File.WriteAllLines(this.testFilePath, new[] { line });
             var simpleSearcher = new SimpleSearcher(this.pathToFiles);
+            var firstExpectedResult = new SearchResult
+            {
+                FilePath = this.testFilePath,
+                RowNumber = 1,
+                ColNumber = 8
+            };
+            var secondExpectedResult = new SearchResult
+            {
+                FilePath = this.testFilePath,
+                RowNumber = 1,
+                ColNumber = 14
+            };
 
-            var results = simpleSearcher.FindString("line.");
+            var results = simpleSearcher.Find("line.");
 
-            results.Count.Should().Be(2);
-            var result = results.Single();
-            result.RowNumber.Should().Be(1);
-            result.ColNumber.Should().Be(8);
-            result.FilePath.Should().Be(this.testFilePath);
+            results.Should().BeEquivalentTo(firstExpectedResult, secondExpectedResult);
         }
 
         [Test]
@@ -72,10 +80,10 @@ namespace Indexer.Tests
 
         private static void EnsureErasedFolder(string path)
         {
-            var di = new DirectoryInfo(path);
-            if (di.Exists)
+            var directoryInfo = new DirectoryInfo(path);
+            if (directoryInfo.Exists)
             {
-                di.Delete(true);
+                directoryInfo.Delete(true);
             }
 
             Directory.CreateDirectory(path);

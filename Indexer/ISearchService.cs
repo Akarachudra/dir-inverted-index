@@ -5,6 +5,6 @@ namespace Indexer
 {
     public interface ISearchService
     {
-        IList<SearchResult> FindString(string searchQuery);
+        IList<SearchResult> Find(string term);
     }
 }

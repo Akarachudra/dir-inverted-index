@@ -11,7 +11,7 @@ namespace Indexer
             this.filesPath = filesPath;
         }
 
-        public IList<SearchResult> FindString(string searchQuery)
+        public IList<SearchResult> Find(string term)
         {
             throw new System.NotImplementedException();
         }

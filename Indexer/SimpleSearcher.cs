@@ -13,17 +13,17 @@ namespace Indexer
             this.filesPath = filesPath;
         }
 
-        public IList<SearchResult> FindString(string searchQuery)
+        public IList<SearchResult> Find(string term)
         {
             var result = new List<SearchResult>();
-            var di = new DirectoryInfo(this.filesPath);
-            foreach (var file in di.GetFiles())
+            var directoryInfo = new DirectoryInfo(this.filesPath);
+            foreach (var file in directoryInfo.GetFiles("*", SearchOption.AllDirectories))
             {
                 var rowNumber = 1;
 
                 foreach (var line in File.ReadLines(file.FullName))
                 {
-                    foreach (Match match in Regex.Matches(line, searchQuery))
+                    foreach (Match match in Regex.Matches(line, term))
                     {
                         result.Add(
                             new SearchResult
