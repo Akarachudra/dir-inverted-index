@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Indexer", "Indexer\Indexer.csproj", "{5037808C-5B3D-4538-A119-0E7292DF7A04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Indexer.Tests", "Indexer.Tests\Indexer.Tests.csproj", "{1C8EB849-7AD4-433E-953D-5C13C83BDE72}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5037808C-5B3D-4538-A119-0E7292DF7A04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5037808C-5B3D-4538-A119-0E7292DF7A04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5037808C-5B3D-4538-A119-0E7292DF7A04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5037808C-5B3D-4538-A119-0E7292DF7A04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C8EB849-7AD4-433E-953D-5C13C83BDE72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C8EB849-7AD4-433E-953D-5C13C83BDE72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C8EB849-7AD4-433E-953D-5C13C83BDE72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C8EB849-7AD4-433E-953D-5C13C83BDE72}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {93651FDC-D955-4824-A06B-02EA53E300FC}
+	EndGlobalSection
+EndGlobal
