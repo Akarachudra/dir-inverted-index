@@ -14,6 +14,8 @@ namespace Indexer.Tests
         private const string SecondFileName = "SecondFileName.txt";
         private const string IncludedFileName = "IncludedFileName.txt";
         private const string DeepIncludedFileName = "DeepIncludedFileName.txt";
+        private const string IncludedDir = "IncludedDir";
+        private const string DeepIncludedDir = "DeepIncludedDir";
         private readonly string firstFilePath;
         private readonly string secondFilePath;
         private readonly string pathToFiles;
@@ -114,11 +116,39 @@ namespace Indexer.Tests
         [Test]
         public void Can_Find_In_Included_File()
         {
+            const string content = "first line.";
+            var directoryPath = Path.Combine(this.pathToFiles, IncludedDir);
+            Directory.CreateDirectory(directoryPath);
+            var includedFilePath = Path.Combine(directoryPath, IncludedFileName);
+            File.WriteAllLines(includedFilePath, new[] { content });
+
+            var results = this.simpleSearcher.Find("line.");
+
+            results.Count.Should().Be(1);
+            var result = results.Single();
+            result.RowNumber.Should().Be(1);
+            result.ColNumber.Should().Be(7);
+            result.FilePath.Should().Be(includedFilePath);
         }
 
         [Test]
         public void Can_Find_In_Deep_Included_File()
         {
+            const string content = "first line.";
+            var directoryPath = Path.Combine(this.pathToFiles, IncludedDir);
+            Directory.CreateDirectory(directoryPath);
+            var deepPath = Path.Combine(directoryPath, DeepIncludedDir);
+            Directory.CreateDirectory(deepPath);
+            var deepIncludedFilePath = Path.Combine(deepPath, DeepIncludedFileName);
+            File.WriteAllLines(deepIncludedFilePath, new[] { content });
+
+            var results = this.simpleSearcher.Find("line.");
+
+            results.Count.Should().Be(1);
+            var result = results.Single();
+            result.RowNumber.Should().Be(1);
+            result.ColNumber.Should().Be(7);
+            result.FilePath.Should().Be(deepIncludedFilePath);
         }
 
         private static string GetPathToTemplates()
