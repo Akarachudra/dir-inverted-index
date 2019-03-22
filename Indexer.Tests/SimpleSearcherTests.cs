@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using FluentAssertions;
 using NUnit.Framework;
@@ -13,13 +14,17 @@ namespace Indexer.Tests
         private const string SecondFileName = "SecondFileName.txt";
         private const string IncludedFileName = "IncludedFileName.txt";
         private const string DeepIncludedFileName = "DeepIncludedFileName.txt";
-        private readonly string testFilePath;
+        private readonly string firstFilePath;
+        private readonly string secondFilePath;
         private readonly string pathToFiles;
+        private readonly ISearchService simpleSearcher;
 
         public SimpleSearcherTests()
         {
             this.pathToFiles = GetPathToTemplates();
-            this.testFilePath = Path.Combine(this.pathToFiles, FirstFileName);
+            this.firstFilePath = Path.Combine(this.pathToFiles, FirstFileName);
+            this.secondFilePath = Path.Combine(this.pathToFiles, SecondFileName);
+            this.simpleSearcher = new SimpleSearcher(this.pathToFiles);
         }
 
         [SetUp]
@@ -31,45 +36,88 @@ namespace Indexer.Tests
         [Test]
         public void Can_Find_In_Simple_Single_Line_File()
         {
-            const string line = "simple line.";
-            File.WriteAllLines(this.testFilePath, new[] { line });
-            var simpleSearcher = new SimpleSearcher(this.pathToFiles);
+            const string content = "simple line.";
+            File.WriteAllLines(this.firstFilePath, new[] { content });
 
-            var results = simpleSearcher.Find("line.");
+            var results = this.simpleSearcher.Find("line.");
 
             results.Count.Should().Be(1);
             var result = results.Single();
             result.RowNumber.Should().Be(1);
             result.ColNumber.Should().Be(8);
-            result.FilePath.Should().Be(this.testFilePath);
+            result.FilePath.Should().Be(this.firstFilePath);
         }
 
         [Test]
         public void Can_Find_Several_Matches_In_Simple_Single_Line_File()
         {
-            const string line = "simple line. line.";
-            File.WriteAllLines(this.testFilePath, new[] { line });
-            var simpleSearcher = new SimpleSearcher(this.pathToFiles);
+            const string content = "simple line. line.";
+            File.WriteAllLines(this.firstFilePath, new[] { content });
             var firstExpectedResult = new SearchResult
             {
-                FilePath = this.testFilePath,
+                FilePath = this.firstFilePath,
                 RowNumber = 1,
                 ColNumber = 8
             };
             var secondExpectedResult = new SearchResult
             {
-                FilePath = this.testFilePath,
+                FilePath = this.firstFilePath,
                 RowNumber = 1,
                 ColNumber = 14
             };
 
-            var results = simpleSearcher.Find("line.");
+            var results = this.simpleSearcher.Find("line.");
 
             results.Should().BeEquivalentTo(firstExpectedResult, secondExpectedResult);
         }
 
         [Test]
         public void Can_Find_In_Simple_Single_Multiline_File()
+        {
+            var content = $"simple {Environment.NewLine}new line.";
+            File.WriteAllLines(this.firstFilePath, new[] { content });
+
+            var results = this.simpleSearcher.Find("line.");
+
+            results.Count.Should().Be(1);
+            var result = results.Single();
+            result.RowNumber.Should().Be(2);
+            result.ColNumber.Should().Be(5);
+            result.FilePath.Should().Be(this.firstFilePath);
+        }
+
+        [Test]
+        public void Can_Find_In_Several_Files()
+        {
+            const string firstFileContent = "first line.";
+            var secondFileContent = $"{Environment.NewLine}new line.";
+            File.WriteAllLines(this.firstFilePath, new[] { firstFileContent });
+            File.WriteAllLines(this.secondFilePath, new[] { secondFileContent });
+            var firstExpectedResult = new SearchResult
+            {
+                FilePath = this.firstFilePath,
+                RowNumber = 1,
+                ColNumber = 7
+            };
+            var secondExpectedResult = new SearchResult
+            {
+                FilePath = this.secondFilePath,
+                RowNumber = 2,
+                ColNumber = 5
+            };
+
+            var results = this.simpleSearcher.Find("line.");
+
+            results.Should().BeEquivalentTo(firstExpectedResult, secondExpectedResult);
+        }
+
+        [Test]
+        public void Can_Find_In_Included_File()
+        {
+        }
+
+        [Test]
+        public void Can_Find_In_Deep_Included_File()
         {
         }
 
