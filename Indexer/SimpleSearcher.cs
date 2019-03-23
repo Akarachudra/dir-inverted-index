@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using Indexer.Helpers;
 
 namespace Indexer
 {
@@ -16,8 +17,8 @@ namespace Indexer
         public IList<SearchResult> Find(string term)
         {
             var result = new List<SearchResult>();
-            var directoryInfo = new DirectoryInfo(this.filesPath);
-            foreach (var file in directoryInfo.GetFiles("*", SearchOption.AllDirectories))
+            var files = FileHelper.GetAllFiles(this.filesPath);
+            foreach (var file in files)
             {
                 var rowNumber = 1;
 
