@@ -24,7 +24,7 @@ namespace Indexer
 
                 foreach (var line in File.ReadLines(file.FullName))
                 {
-                    foreach (Match match in Regex.Matches(line, term))
+                    foreach (Match match in Regex.Matches(line, term, RegexOptions.IgnoreCase))
                     {
                         result.Add(
                             new SearchResult

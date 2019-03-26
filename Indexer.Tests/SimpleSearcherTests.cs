@@ -127,5 +127,20 @@ namespace Indexer.Tests
             result.ColNumber.Should().Be(7);
             result.FilePath.Should().Be(this.DeepIncludedFilePath);
         }
+
+        [Test]
+        public void SimpleSearcher_Is_Case_Insensitive()
+        {
+            const string content = "simple LiNe.";
+            File.WriteAllLines(this.FirstFilePath, new[] { content });
+
+            var results = this.simpleSearcher.Find("lIne.");
+
+            results.Count.Should().Be(1);
+            var result = results.Single();
+            result.RowNumber.Should().Be(1);
+            result.ColNumber.Should().Be(8);
+            result.FilePath.Should().Be(this.FirstFilePath);
+        }
     }
 }
