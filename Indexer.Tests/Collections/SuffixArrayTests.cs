@@ -75,5 +75,24 @@ namespace Indexer.Tests.Collections
             value.Should().Be(1);
             suffixArray.TryGetValue("not_exists_key", out value, stringComparer).Should().BeFalse();
         }
+
+        [Test]
+        public void Check_Count_And_Capacity()
+        {
+            var intComparer = Comparer<int>.Default;
+            var suffixArray = new SuffixArray<int, int>();
+
+            suffixArray.TryAdd(1, 1, intComparer);
+            suffixArray.Count.Should().Be(1);
+            suffixArray.Capacity.Should().Be(16);
+
+            for (var i = 0; i < 16; i++)
+            {
+                suffixArray.TryAdd(i + 2, i, intComparer);
+            }
+
+            suffixArray.Count.Should().Be(17);
+            suffixArray.Capacity.Should().Be(32);
+        }
     }
 }

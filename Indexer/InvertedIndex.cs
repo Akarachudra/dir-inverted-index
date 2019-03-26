@@ -19,6 +19,7 @@ namespace Indexer
 
         public void Add(string word, SearchResult curResult)
         {
+            word = word.ToLower();
             var length = word.Length;
             for (var i = 0; i < word.Length; i++)
             {
@@ -43,6 +44,7 @@ namespace Indexer
 
         public IList<SearchResult> Find(string query)
         {
+            query = query.ToLower();
             if (this.suffixArray.TryGetValue(query, out var list, this.readComparer))
             {
                 return list;

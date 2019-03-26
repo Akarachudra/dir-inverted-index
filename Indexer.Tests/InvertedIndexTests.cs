@@ -22,5 +22,16 @@ namespace Indexer.Tests
             invertedIndex.Find("e_s").Should().BeEquivalentTo(new SearchResult { RowNumber = 2, ColNumber = 2, FilePath = path });
             invertedIndex.Find("some_word").Should().BeEmpty();
         }
+
+        [Test]
+        public void InvertedIndex_Is_Case_Insensitive()
+        {
+            var invertedIndex = new InvertedIndex();
+            var searchResult = new SearchResult { RowNumber = 2, ColNumber = 1, FilePath = "path" };
+
+            invertedIndex.Add("T_e_s_T", searchResult);
+
+            invertedIndex.Find("t_E_s_t").Should().BeEquivalentTo(searchResult);
+        }
     }
 }

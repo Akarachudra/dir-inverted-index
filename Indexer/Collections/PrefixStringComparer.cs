@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Indexer
+namespace Indexer.Collections
 {
     public class PrefixStringComparer : IComparer<string>
     {
