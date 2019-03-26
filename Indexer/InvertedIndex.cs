@@ -1,14 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Indexer.Collections;
 
 namespace Indexer
 {
     public class InvertedIndex
     {
-        private readonly SortedList<string, IList<SearchResult>> list;
+        private readonly SuffixArray<string, IList<SearchResult>> suffixArray;
+        private readonly IComparer<string> insertComparer;
+        private readonly IComparer<string> readComparer;
 
         public InvertedIndex()
         {
-            this.list = new SortedList<string, IList<SearchResult>>();
+            this.suffixArray = new SuffixArray<string, IList<SearchResult>>();
+            this.insertComparer = StringComparer.Ordinal;
+            this.readComparer = new PrefixStringComparer();
         }
 
         public void Add(string word, SearchResult curResult)
@@ -24,20 +30,22 @@ namespace Indexer
                 };
 
                 var suffix = word.Substring(i, length - i);
-                if (!this.list.ContainsKey(suffix))
+                if (!this.suffixArray.TryGetValue(suffix, out var list, this.insertComparer))
                 {
-                    this.list.Add(suffix, new List<SearchResult>());
+                    this.suffixArray.TryAdd(suffix, new List<SearchResult> { curResult }, this.insertComparer);
                 }
-
-                this.list[suffix].Add(curResult);
+                else
+                {
+                    list.Add(curResult);
+                }
             }
         }
 
         public IList<SearchResult> Find(string query)
         {
-            if (this.list.ContainsKey(query))
+            if (this.suffixArray.TryGetValue(query, out var list, this.readComparer))
             {
-                return this.list[query];
+                return list;
             }
 
             return new List<SearchResult>();

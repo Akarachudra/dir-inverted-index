@@ -14,14 +14,12 @@ namespace Indexer.Tests.Collections
         public void Compare_Via_Insert_Comparer_On_Add()
         {
             var insertComparerMock = new Mock<IComparer<string>>();
-            var readComparerMock = new Mock<IComparer<string>>();
-            var suffixArray = new SuffixArray<string, int>(insertComparerMock.Object, readComparerMock.Object);
+            var suffixArray = new SuffixArray<string, int>();
 
-            suffixArray.TryAdd("test", 1);
-            suffixArray.TryAdd("tes", 2);
+            suffixArray.TryAdd("test", 1, insertComparerMock.Object);
+            suffixArray.TryAdd("tes", 2, insertComparerMock.Object);
 
             insertComparerMock.Verify(x => x.Compare("test", "tes"), Times.Once);
-            readComparerMock.VerifyNoOtherCalls();
         }
 
         [Test]
@@ -29,12 +27,12 @@ namespace Indexer.Tests.Collections
         {
             var insertComparerMock = new Mock<IComparer<string>>();
             var readComparerMock = new Mock<IComparer<string>>();
-            var suffixArray = new SuffixArray<string, int>(insertComparerMock.Object, readComparerMock.Object);
+            var suffixArray = new SuffixArray<string, int>();
 
-            suffixArray.TryAdd("test", 1);
-            suffixArray.TryAdd("tes", 2);
+            suffixArray.TryAdd("test", 1, insertComparerMock.Object);
+            suffixArray.TryAdd("tes", 2, insertComparerMock.Object);
 
-            suffixArray.TryGetValue("tes", out _);
+            suffixArray.TryGetValue("tes", out _, readComparerMock.Object);
 
             readComparerMock.Verify(x => x.Compare("test", "tes"), Times.Once);
         }
@@ -42,6 +40,7 @@ namespace Indexer.Tests.Collections
         [Test]
         public void Keys_And_Values_Are_Ordered_After_Insert()
         {
+            var stringComparer = StringComparer.Ordinal;
             const string word = "ananas";
             var expectedOrderedKeys = new[]
             {
@@ -51,11 +50,11 @@ namespace Indexer.Tests.Collections
             {
                 0, 2, 4, 1, 3, 5
             };
-            var suffixArray = new SuffixArray<string, int>(StringComparer.Ordinal, StringComparer.Ordinal);
+            var suffixArray = new SuffixArray<string, int>();
             for (var i = 0; i < word.Length; i++)
             {
                 var suffix = word.Substring(i, word.Length - i);
-                suffixArray.TryAdd(suffix, i);
+                suffixArray.TryAdd(suffix, i, stringComparer);
             }
 
             suffixArray.Keys.Should().BeEquivalentTo(expectedOrderedKeys, options => options.WithStrictOrdering());
@@ -65,15 +64,16 @@ namespace Indexer.Tests.Collections
         [Test]
         public void Can_Add_And_Get()
         {
-            var suffixArray = new SuffixArray<string, int>(StringComparer.Ordinal, StringComparer.Ordinal);
+            var stringComparer = StringComparer.Ordinal;
+            var suffixArray = new SuffixArray<string, int>();
             int value;
 
-            suffixArray.TryAdd("test", 1).Should().BeTrue();
-            suffixArray.TryAdd("test", 1).Should().BeFalse();
+            suffixArray.TryAdd("test", 1, stringComparer).Should().BeTrue();
+            suffixArray.TryAdd("test", 1, stringComparer).Should().BeFalse();
 
-            suffixArray.TryGetValue("test", out value).Should().BeTrue();
+            suffixArray.TryGetValue("test", out value, stringComparer).Should().BeTrue();
             value.Should().Be(1);
-            suffixArray.TryGetValue("not_exists_key", out value).Should().BeFalse();
+            suffixArray.TryGetValue("not_exists_key", out value, stringComparer).Should().BeFalse();
         }
     }
 }

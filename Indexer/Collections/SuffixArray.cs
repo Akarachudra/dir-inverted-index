@@ -6,21 +6,17 @@ namespace Indexer.Collections
     public class SuffixArray<TKey, TValue>
     {
         private const int MinimumCapacity = 16;
-        private readonly IComparer<TKey> insertComparer;
-        private readonly IComparer<TKey> readComparer;
         private TKey[] keys;
         private TValue[] values;
         private int size;
 
-        public SuffixArray(IComparer<TKey> insertComparer, IComparer<TKey> readComparer)
-            : this(0, insertComparer, readComparer)
+        public SuffixArray()
+            : this(0)
         {
         }
 
-        public SuffixArray(int capacity, IComparer<TKey> insertComparer, IComparer<TKey> readComparer)
+        public SuffixArray(int capacity)
         {
-            this.insertComparer = insertComparer;
-            this.readComparer = readComparer;
             this.keys = new TKey[0];
             this.values = new TValue[0];
             this.Capacity = capacity;
@@ -91,9 +87,9 @@ namespace Indexer.Collections
 
         public int Count => this.size;
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, out TValue value, IComparer<TKey> comparer)
         {
-            var index = Array.BinarySearch(this.keys, 0, this.size, key, this.readComparer);
+            var index = Array.BinarySearch(this.keys, 0, this.size, key, comparer);
             if (index >= 0)
             {
                 value = this.values[index];
@@ -104,9 +100,9 @@ namespace Indexer.Collections
             return false;
         }
 
-        public bool TryAdd(TKey key, TValue value)
+        public bool TryAdd(TKey key, TValue value, IComparer<TKey> comparer)
         {
-            var index = Array.BinarySearch(this.keys, 0, this.size, key, this.insertComparer);
+            var index = Array.BinarySearch(this.keys, 0, this.size, key, comparer);
             if (index >= 0)
             {
                 return false;
