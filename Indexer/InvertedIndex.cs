@@ -75,24 +75,27 @@ namespace Indexer
         private static IList<SearchResult> GetPhraseMatches(string[] suffixes, IList<SearchResult>[] lists)
         {
             var resultList = new List<SearchResult>();
-
+            var suffixesCount = suffixes.Length;
             var suffix = suffixes[0];
             var currentOffset = suffix.Length + 1;
             for (var j = 0; j < lists[0].Count; j++)
             {
                 var currentResult = lists[0][j];
-                for (var m = 1; m < suffixes.Length; m++)
+                for (var m = 1; m < suffixesCount; m++)
                 {
-                    if (!HasMatch(
-                        new SearchResult
-                            { FilePath = currentResult.FilePath, RowNumber = currentResult.RowNumber, ColNumber = currentResult.ColNumber + currentOffset },
-                        lists[m]))
+                    var expectedNextResult = new SearchResult
+                    {
+                        FilePath = currentResult.FilePath,
+                        RowNumber = currentResult.RowNumber,
+                        ColNumber = currentResult.ColNumber + currentOffset
+                    };
+                    if (!ListContains(lists[m], expectedNextResult))
                     {
                         break;
                     }
 
                     currentOffset += suffixes[m].Length + 1;
-                    if (m == suffixes.Length - 1)
+                    if (m == suffixesCount - 1)
                     {
                         resultList.Add(currentResult);
                     }
@@ -102,7 +105,7 @@ namespace Indexer
             return resultList;
         }
 
-        private static bool HasMatch(SearchResult result, IList<SearchResult> list)
+        private static bool ListContains(IList<SearchResult> list, SearchResult result)
         {
             foreach (var searchResult in list)
             {
