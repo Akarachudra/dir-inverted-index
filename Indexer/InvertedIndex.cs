@@ -78,10 +78,10 @@ namespace Indexer
             var suffixesCount = suffixes.Length;
             var suffix = suffixes[0];
             var currentOffset = suffix.Length + 1;
-            for (var j = 0; j < lists[0].Count; j++)
+            for (var i = 0; i < lists[0].Count; i++)
             {
-                var currentResult = lists[0][j];
-                for (var m = 1; m < suffixesCount; m++)
+                var currentResult = lists[0][i];
+                for (var j = 1; j < suffixesCount; j++)
                 {
                     var expectedNextResult = new SearchResult
                     {
@@ -89,13 +89,13 @@ namespace Indexer
                         RowNumber = currentResult.RowNumber,
                         ColNumber = currentResult.ColNumber + currentOffset
                     };
-                    if (!ListContains(lists[m], expectedNextResult))
+                    if (!ListContains(lists[j], expectedNextResult))
                     {
                         break;
                     }
 
-                    currentOffset += suffixes[m].Length + 1;
-                    if (m == suffixesCount - 1)
+                    currentOffset += suffixes[j].Length + 1;
+                    if (j == suffixesCount - 1)
                     {
                         resultList.Add(currentResult);
                     }

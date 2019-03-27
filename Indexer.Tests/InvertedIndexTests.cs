@@ -37,17 +37,54 @@ namespace Indexer.Tests
         [Test]
         public void Can_Find_Simple_Phrase()
         {
-            const string file = "file";
+            const string simplePhrase = "some phrase in code";
             var invertedIndex = new InvertedIndex();
+            InsertPhraseToIndex(invertedIndex, simplePhrase);
 
-            invertedIndex.Add("some", new SearchResult { FilePath = file, ColNumber = 1, RowNumber = 1 });
-            invertedIndex.Add("phrase", new SearchResult { FilePath = file, ColNumber = 6, RowNumber = 1 });
-            invertedIndex.Add("in", new SearchResult { FilePath = file, ColNumber = 13, RowNumber = 1 });
-            invertedIndex.Add("code", new SearchResult { FilePath = file, ColNumber = 16, RowNumber = 1 });
+            invertedIndex.Find("some phrase").Should().BeEquivalentTo(new SearchResult { ColNumber = 1 });
+            invertedIndex.Find("ome phr").Should().BeEquivalentTo(new SearchResult { ColNumber = 2 });
+            invertedIndex.Find("ase in cod").Should().BeEquivalentTo(new SearchResult { ColNumber = 9 });
+        }
 
-            invertedIndex.Find("some phrase").Should().BeEquivalentTo(new SearchResult { FilePath = file, ColNumber = 1, RowNumber = 1 });
-            invertedIndex.Find("ome phr").Should().BeEquivalentTo(new SearchResult { FilePath = file, ColNumber = 2, RowNumber = 1 });
-            invertedIndex.Find("ase in cod").Should().BeEquivalentTo(new SearchResult { FilePath = file, ColNumber = 9, RowNumber = 1 });
+        [Test]
+        public void Can_Find_Word_With_Space()
+        {
+            const string phrase = "t est";
+            var invertedIndex = new InvertedIndex();
+            InsertPhraseToIndex(invertedIndex, phrase);
+
+            invertedIndex.Find(" est").Should().BeEquivalentTo(new SearchResult { ColNumber = 2 });
+        }
+
+        [Test]
+        public void Can_Find_Phrase_With_Additional_Spaces_And_Symbols()
+        {
+            const string additionalPhrase = "Ad.  phrase   ! ";
+            var invertedIndex = new InvertedIndex();
+            InsertPhraseToIndex(invertedIndex, additionalPhrase);
+
+            invertedIndex.Find("Ad.  ").Should().BeEquivalentTo(new SearchResult { ColNumber = 1 });
+            invertedIndex.Find("rase   ").Should().BeEquivalentTo(new SearchResult { ColNumber = 8 });
+            invertedIndex.Find("  phrase   ").Should().BeEquivalentTo(new SearchResult { ColNumber = 4 });
+            invertedIndex.Find(" !").Should().BeEquivalentTo(new SearchResult { ColNumber = 14 });
+            invertedIndex.Find("!").Should().BeEquivalentTo(new SearchResult { ColNumber = 15 });
+            invertedIndex.Find("! ").Should().BeEquivalentTo(new SearchResult { ColNumber = 15 });
+        }
+
+        private static void InsertPhraseToIndex(InvertedIndex index, string phrase, string filePath = null)
+        {
+            var terms = phrase.Split(' ');
+            var offset = 1;
+            foreach (var term in terms)
+            {
+                var curResult = new SearchResult
+                {
+                    FilePath = filePath,
+                    ColNumber = offset
+                };
+                index.Add(term, curResult);
+                offset += term.Length + 1;
+            }
         }
     }
 }
