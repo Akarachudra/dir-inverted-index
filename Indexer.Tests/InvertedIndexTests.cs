@@ -60,11 +60,12 @@ namespace Indexer.Tests
         [Test]
         public void Can_Find_Phrase_With_Additional_Spaces_And_Symbols()
         {
-            const string additionalPhrase = "Ad.  phrase   !";
+            const string additionalPhrase = "As.  phrase   ! ";
             var invertedIndex = new InvertedIndex(new CodeTokenizer());
             InsertPhraseToIndex(invertedIndex, additionalPhrase);
 
-            invertedIndex.Find("Ad.  ").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 });
+            invertedIndex.Find("as").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 }, new StoredResult { ColNumber = 9 });
+            invertedIndex.Find("As.  ").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 });
             invertedIndex.Find("rase   ").Should().BeEquivalentTo(new StoredResult { ColNumber = 8 });
             invertedIndex.Find("  phrase   ").Should().BeEquivalentTo(new StoredResult { ColNumber = 4 });
             invertedIndex.Find(" !").Should().BeEquivalentTo(new StoredResult { ColNumber = 14 });
