@@ -14,9 +14,9 @@ namespace Indexer
             this.filesPath = filesPath;
         }
 
-        public IList<SearchResult> Find(string term)
+        public IList<StoredResult> Find(string term)
         {
-            var result = new List<SearchResult>();
+            var result = new List<StoredResult>();
             var files = FileHelper.GetAllFiles(this.filesPath);
             foreach (var file in files)
             {
@@ -27,9 +27,9 @@ namespace Indexer
                     foreach (Match match in Regex.Matches(line, term, RegexOptions.IgnoreCase))
                     {
                         result.Add(
-                            new SearchResult
+                            new StoredResult
                             {
-                                FilePath = file.FullName,
+                                PathHash = file.FullName,
                                 ColNumber = match.Index + 1,
                                 RowNumber = rowNumber
                             });

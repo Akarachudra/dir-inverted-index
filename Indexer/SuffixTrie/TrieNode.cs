@@ -6,7 +6,7 @@ namespace Indexer.SuffixTrie
     public class TrieNode
     {
         private ConcurrentDictionary<char, TrieNode> childrens;
-        private IList<SearchResult> matches;
+        private IList<StoredResult> matches;
 
         public ConcurrentDictionary<char, TrieNode> Childrens
         {
@@ -14,9 +14,9 @@ namespace Indexer.SuffixTrie
             set => this.childrens = value;
         }
 
-        public IList<SearchResult> Matches
+        public IList<StoredResult> Matches
         {
-            get => this.matches ?? (this.matches = new List<SearchResult>());
+            get => this.matches ?? (this.matches = new List<StoredResult>());
             set => this.matches = value;
         }
     }

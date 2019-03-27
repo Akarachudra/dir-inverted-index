@@ -45,10 +45,5 @@ namespace Indexer.Tests.Tokens
 
             tokens.Should().BeEquivalentTo(new Token { Term = "test", Position = 1 });
         }
-
-        [Test]
-        public void Tokenizer_Should_Be_Faster_Than_Split()
-        {
-        }
     }
 }

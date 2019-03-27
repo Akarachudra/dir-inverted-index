@@ -1,8 +1,8 @@
 ﻿namespace Indexer
 {
-    public class SearchResult
+    public class StoredResult
     {
-        public string FilePath { get; set; }
+        public string PathHash { get; set; }
 
         public int RowNumber { get; set; }
 

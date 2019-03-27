@@ -29,7 +29,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(1);
             result.ColNumber.Should().Be(8);
-            result.FilePath.Should().Be(this.FirstFilePath);
+            result.PathHash.Should().Be(this.FirstFilePath);
         }
 
         [Test]
@@ -37,15 +37,15 @@ namespace Indexer.Tests
         {
             const string content = "simple line. line.";
             File.WriteAllLines(this.FirstFilePath, new[] { content });
-            var firstExpectedResult = new SearchResult
+            var firstExpectedResult = new StoredResult
             {
-                FilePath = this.FirstFilePath,
+                PathHash = this.FirstFilePath,
                 RowNumber = 1,
                 ColNumber = 8
             };
-            var secondExpectedResult = new SearchResult
+            var secondExpectedResult = new StoredResult
             {
-                FilePath = this.FirstFilePath,
+                PathHash = this.FirstFilePath,
                 RowNumber = 1,
                 ColNumber = 14
             };
@@ -67,7 +67,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(2);
             result.ColNumber.Should().Be(5);
-            result.FilePath.Should().Be(this.FirstFilePath);
+            result.PathHash.Should().Be(this.FirstFilePath);
         }
 
         [Test]
@@ -77,15 +77,15 @@ namespace Indexer.Tests
             var secondFileContent = $"{Environment.NewLine}new line.";
             File.WriteAllLines(this.FirstFilePath, new[] { firstFileContent });
             File.WriteAllLines(this.SecondFilePath, new[] { secondFileContent });
-            var firstExpectedResult = new SearchResult
+            var firstExpectedResult = new StoredResult
             {
-                FilePath = this.FirstFilePath,
+                PathHash = this.FirstFilePath,
                 RowNumber = 1,
                 ColNumber = 7
             };
-            var secondExpectedResult = new SearchResult
+            var secondExpectedResult = new StoredResult
             {
-                FilePath = this.SecondFilePath,
+                PathHash = this.SecondFilePath,
                 RowNumber = 2,
                 ColNumber = 5
             };
@@ -108,7 +108,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(1);
             result.ColNumber.Should().Be(7);
-            result.FilePath.Should().Be(this.IncludedFilePath);
+            result.PathHash.Should().Be(this.IncludedFilePath);
         }
 
         [Test]
@@ -125,7 +125,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(1);
             result.ColNumber.Should().Be(7);
-            result.FilePath.Should().Be(this.DeepIncludedFilePath);
+            result.PathHash.Should().Be(this.DeepIncludedFilePath);
         }
 
         [Test]
@@ -140,7 +140,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(1);
             result.ColNumber.Should().Be(8);
-            result.FilePath.Should().Be(this.FirstFilePath);
+            result.PathHash.Should().Be(this.FirstFilePath);
         }
     }
 }

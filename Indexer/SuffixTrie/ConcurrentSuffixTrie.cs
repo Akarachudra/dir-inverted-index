@@ -11,16 +11,16 @@ namespace Indexer.SuffixTrie
             this.root = new TrieNode();
         }
 
-        public void Insert(string s, SearchResult searchResult)
+        public void Insert(string s, StoredResult storedResult)
         {
-            var curResult = searchResult;
+            var curResult = storedResult;
             for (var i = 0; i < s.Length; i++)
             {
                 var curNode = this.root;
-                curResult = new SearchResult
+                curResult = new StoredResult
                 {
                     ColNumber = curResult.ColNumber + i,
-                    FilePath = curResult.FilePath,
+                    PathHash = curResult.PathHash,
                     RowNumber = curResult.RowNumber
                 };
                 for (var j = i; j < s.Length; j++)
@@ -37,14 +37,14 @@ namespace Indexer.SuffixTrie
             }
         }
 
-        public IList<SearchResult> Find(string suffix)
+        public IList<StoredResult> Find(string suffix)
         {
             var curNode = this.root;
             foreach (var c in suffix)
             {
                 if (!curNode.Childrens.TryGetValue(c, out curNode))
                 {
-                    return new List<SearchResult>();
+                    return new List<StoredResult>();
                 }
             }
 

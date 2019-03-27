@@ -18,7 +18,7 @@ namespace Indexer.Tokens
                 {
                     tokens.Add(new Token { Term = term.ToString(), Position = termIndex + 1 });
                     termIndex = i;
-                    term = new StringBuilder();
+                    term.Clear();
                 }
 
                 term.Append(c);
