@@ -33,5 +33,21 @@ namespace Indexer.Tests
 
             invertedIndex.Find("t_E_s_t").Should().BeEquivalentTo(searchResult);
         }
+
+        [Test]
+        public void Can_Find_Simple_Phrase()
+        {
+            const string file = "file";
+            var invertedIndex = new InvertedIndex();
+
+            invertedIndex.Add("some", new SearchResult { FilePath = file, ColNumber = 1, RowNumber = 1 });
+            invertedIndex.Add("phrase", new SearchResult { FilePath = file, ColNumber = 6, RowNumber = 1 });
+            invertedIndex.Add("in", new SearchResult { FilePath = file, ColNumber = 13, RowNumber = 1 });
+            invertedIndex.Add("code", new SearchResult { FilePath = file, ColNumber = 16, RowNumber = 1 });
+
+            invertedIndex.Find("some phrase").Should().BeEquivalentTo(new SearchResult { FilePath = file, ColNumber = 1, RowNumber = 1 });
+            invertedIndex.Find("ome phr").Should().BeEquivalentTo(new SearchResult { FilePath = file, ColNumber = 2, RowNumber = 1 });
+            invertedIndex.Find("ase in cod").Should().BeEquivalentTo(new SearchResult { FilePath = file, ColNumber = 9, RowNumber = 1 });
+        }
     }
 }
