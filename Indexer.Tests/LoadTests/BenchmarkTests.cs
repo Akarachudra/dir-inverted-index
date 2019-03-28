@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
+using FluentAssertions;
 using Indexer.Indexes;
 using Indexer.Tests.Base;
 using Indexer.Tokens;
@@ -39,11 +39,62 @@ namespace Indexer.Tests.LoadTests
             Console.WriteLine($"SuffixIndex build time: {suffixIndeBuildTime}");
         }
 
-        private static void BuildIndex(IInvertedIndex index, IEnumerable<string> lines)
+        [Test]
+        public void Search_Result_Is_Same_For_InvertedIndex_And_SimpleSearching()
         {
-            foreach (var line in lines)
+            var tokenizer = new DefaultTokenizer();
+            var lines = TestDataGenerator.GetRandomLines(Environment.TickCount);
+            var invertedIndex = new InvertedIndex(tokenizer);
+            var phrase = TestDataGenerator.GetSearchPhrase(Environment.TickCount);
+            BuildIndex(invertedIndex, lines);
+
+            var inmemoryResult = InmemorySimpleSearch.Find(lines, phrase);
+
+            invertedIndex.Find(phrase).Should().BeEquivalentTo(inmemoryResult);
+        }
+
+        [Test]
+        public void InvertedIndex_Should_Be_Faster_Than_Simple_Searching()
+        {
+            const int phrasesCount = 100;
+            var phrases = new string[phrasesCount];
+            for (var i = 0; i < phrasesCount; i++)
             {
-                index.Add(line, 1, null);
+                phrases[i] = TestDataGenerator.GetSearchPhrase(Environment.TickCount);
+            }
+
+            var tokenizer = new DefaultTokenizer();
+            var stopWatch = new Stopwatch();
+            var lines = TestDataGenerator.GetRandomLines(Environment.TickCount, 40000);
+            var invertedIndex = new InvertedIndex(tokenizer);
+            BuildIndex(invertedIndex, lines);
+
+            stopWatch.Start();
+            for (var i = 0; i < phrasesCount; i++)
+            {
+                invertedIndex.Find(phrases[i]);
+            }
+
+            var indexSearchingTime = stopWatch.Elapsed;
+
+            stopWatch.Restart();
+            for (var i = 0; i < phrasesCount; i++)
+            {
+                InmemorySimpleSearch.Find(lines, phrases[i]);
+            }
+
+            var simpleSearchingTime = stopWatch.Elapsed;
+
+            Console.WriteLine($"InvertedIndex searching time: {indexSearchingTime}");
+            Console.WriteLine($"Simple searching time: {simpleSearchingTime}");
+            indexSearchingTime.Should().BeLessThan(simpleSearchingTime);
+        }
+
+        private static void BuildIndex(IInvertedIndex index, string[] lines)
+        {
+            for (var i = 0; i < lines.Length; i++)
+            {
+                index.Add(lines[i], i + 1, null);
             }
         }
     }

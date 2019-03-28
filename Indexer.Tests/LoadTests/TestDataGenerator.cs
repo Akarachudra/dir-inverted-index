@@ -7,14 +7,13 @@ namespace Indexer.Tests.LoadTests
     {
         public static string[] Terms = new[]
         {
-            "program", " ", "var", "const", ".", "class", "interface", "Method()", "int", "string", "static", "  ", ";", "[]", "IList<>", "Dictionary",
-            "Concurrent", "System", "using", "(", ")", "i", "++", "namespace", "{", "}", "true", "false", "for", "ToString()", "char", "=", ">", "<", "==",
-            "return", "Get()"
+            "program", " ", "var", "const", ".", "class", "interface", "Method", "int", "string", "static", "  ", ";", "IList<>", "Dictionary",
+            "Concurrent", "System", "using", "i", "++", "namespace", "true", "false", "for", "ToString", "char", "=", ">", "<", "==",
+            "return", "Get", "PROGRAM", "VAR", "CONST", "CLASS", "INTERFACE", "FOR", "BREAK", "CONTINUE"
         };
 
-        public static string[] GetRandomLines(int seed)
+        public static string[] GetRandomLines(int seed, int linesCount = 5000)
         {
-            const int linesCount = 5000;
             var random = new Random(seed);
             var lines = new string[linesCount];
             var strBuilder = new StringBuilder();
