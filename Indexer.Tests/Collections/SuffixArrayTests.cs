@@ -32,7 +32,7 @@ namespace Indexer.Tests.Collections
             suffixArray.TryAdd("test", 1, insertComparerMock.Object);
             suffixArray.TryAdd("tes", 2, insertComparerMock.Object);
 
-            suffixArray.TryGetValue("tes", out _, readComparerMock.Object);
+            suffixArray.TryGetValue("tes", out int _, readComparerMock.Object);
 
             readComparerMock.Verify(x => x.Compare("test", "tes"), Times.Once);
         }
@@ -93,6 +93,27 @@ namespace Indexer.Tests.Collections
 
             suffixArray.Count.Should().Be(17);
             suffixArray.Capacity.Should().Be(32);
+        }
+
+        [Test]
+        public void Can_Get_Range_Value_By_Prefix_Comparer()
+        {
+            var stringComparer = StringComparer.Ordinal;
+            var prefixComparer = new PrefixStringComparer();
+            var suffixArray = new SuffixArray<string, int>();
+            int[] value;
+
+            suffixArray.TryAdd("_test", 1, stringComparer);
+            suffixArray.TryAdd("_est", 2, stringComparer);
+            suffixArray.TryAdd("test", 3, stringComparer);
+            suffixArray.TryAdd("zone", 4, stringComparer);
+            suffixArray.TryAdd("z", 5, stringComparer);
+
+            suffixArray.TryGetValue("_", out value, prefixComparer).Should().BeTrue();
+            value.Should().BeEquivalentTo(1, 2);
+            suffixArray.TryGetValue("z", out value, prefixComparer).Should().BeTrue();
+            value.Should().BeEquivalentTo(4, 5);
+            suffixArray.TryGetValue("not_exists", out value, prefixComparer).Should().BeFalse();
         }
     }
 }

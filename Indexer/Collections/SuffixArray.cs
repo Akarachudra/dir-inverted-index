@@ -87,6 +87,28 @@ namespace Indexer.Collections
 
         public int Count => this.size;
 
+        public bool TryGetValue(TKey key, out TValue[] value, IComparer<TKey> comparer)
+        {
+            var leftIndex = this.LeftBinarySearch(key, comparer);
+            var rightIndex = this.RightBinarySearch(key, comparer);
+            if (leftIndex <= rightIndex)
+            {
+                var result = new TValue[rightIndex - leftIndex + 1];
+                var j = 0;
+                for (var i = leftIndex; i <= rightIndex; i++)
+                {
+                    result[j] = this.values[i];
+                    j++;
+                }
+
+                value = result;
+                return true;
+            }
+
+            value = new TValue[0];
+            return false;
+        }
+
         public bool TryGetValue(TKey key, out TValue value, IComparer<TKey> comparer)
         {
             var index = Array.BinarySearch(this.keys, 0, this.size, key, comparer);
@@ -126,6 +148,46 @@ namespace Indexer.Collections
             this.values[index] = value;
 
             return true;
+        }
+
+        private int LeftBinarySearch(TKey key, IComparer<TKey> comparer)
+        {
+            var leftIndex = 0;
+            var rightIndex = this.size;
+            while (leftIndex < rightIndex)
+            {
+                var midIndex = (leftIndex + rightIndex) / 2;
+                if (comparer.Compare(this.keys[midIndex], key) < 0)
+                {
+                    leftIndex = midIndex + 1;
+                }
+                else
+                {
+                    rightIndex = midIndex;
+                }
+            }
+
+            return leftIndex;
+        }
+
+        private int RightBinarySearch(TKey key, IComparer<TKey> comparer)
+        {
+            var leftIndex = 0;
+            var rightIndex = this.size;
+            while (leftIndex < rightIndex)
+            {
+                var midIndex = (leftIndex + rightIndex) / 2;
+                if (comparer.Compare(this.keys[midIndex], key) <= 0)
+                {
+                    leftIndex = midIndex + 1;
+                }
+                else
+                {
+                    rightIndex = midIndex;
+                }
+            }
+
+            return leftIndex - 1;
         }
 
         private void EnsureCapacity(int minimumSize)
