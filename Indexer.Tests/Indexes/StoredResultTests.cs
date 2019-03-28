@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Indexer.Tests.Indexes
 {
     [TestFixture]
-    public class StoredResulTests
+    public class StoredResultTests
     {
         [TestCase("test", 2, 1, -1781404647)]
         [TestCase("ok", 4, 6, -261317990)]
@@ -13,7 +13,7 @@ namespace Indexer.Tests.Indexes
         {
             var storedResult = new StoredResult
             {
-                PathHash = pathHash,
+                Document = pathHash,
                 RowNumber = rowNumber,
                 ColNumber = colNumber
             };
@@ -26,21 +26,21 @@ namespace Indexer.Tests.Indexes
         {
             var firstStoredResult = new StoredResult
             {
-                PathHash = "Test",
+                Document = "Test",
                 RowNumber = 10,
                 ColNumber = 5
             };
             var secondStoredResult = new StoredResult
             {
-                PathHash = "Test",
+                Document = "Test",
                 RowNumber = 10,
                 ColNumber = 5
             };
 
             firstStoredResult.Equals(secondStoredResult).Should().BeTrue();
-            secondStoredResult.PathHash = "New";
+            secondStoredResult.Document = "New";
             firstStoredResult.Equals(secondStoredResult).Should().BeFalse();
-            secondStoredResult.PathHash = firstStoredResult.PathHash;
+            secondStoredResult.Document = firstStoredResult.Document;
             secondStoredResult.RowNumber = 25;
             firstStoredResult.Equals(secondStoredResult).Should().BeFalse();
             secondStoredResult.RowNumber = firstStoredResult.RowNumber;

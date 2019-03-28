@@ -21,7 +21,7 @@ namespace Indexer.SuffixTrie
                 curResult = new StoredResult
                 {
                     ColNumber = curResult.ColNumber + i,
-                    PathHash = curResult.PathHash,
+                    Document = curResult.Document,
                     RowNumber = curResult.RowNumber
                 };
                 for (var j = i; j < s.Length; j++)

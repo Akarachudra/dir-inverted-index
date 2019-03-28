@@ -30,7 +30,7 @@ namespace Indexer
                         result.Add(
                             new StoredResult
                             {
-                                PathHash = file.FullName,
+                                Document = file.FullName,
                                 ColNumber = match.Index + 1,
                                 RowNumber = rowNumber
                             });

@@ -30,7 +30,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(1);
             result.ColNumber.Should().Be(8);
-            result.PathHash.Should().Be(this.FirstFilePath);
+            result.Document.Should().Be(this.FirstFilePath);
         }
 
         [Test]
@@ -40,13 +40,13 @@ namespace Indexer.Tests
             File.WriteAllLines(this.FirstFilePath, new[] { content });
             var firstExpectedResult = new StoredResult
             {
-                PathHash = this.FirstFilePath,
+                Document = this.FirstFilePath,
                 RowNumber = 1,
                 ColNumber = 8
             };
             var secondExpectedResult = new StoredResult
             {
-                PathHash = this.FirstFilePath,
+                Document = this.FirstFilePath,
                 RowNumber = 1,
                 ColNumber = 14
             };
@@ -68,7 +68,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(2);
             result.ColNumber.Should().Be(5);
-            result.PathHash.Should().Be(this.FirstFilePath);
+            result.Document.Should().Be(this.FirstFilePath);
         }
 
         [Test]
@@ -80,13 +80,13 @@ namespace Indexer.Tests
             File.WriteAllLines(this.SecondFilePath, new[] { secondFileContent });
             var firstExpectedResult = new StoredResult
             {
-                PathHash = this.FirstFilePath,
+                Document = this.FirstFilePath,
                 RowNumber = 1,
                 ColNumber = 7
             };
             var secondExpectedResult = new StoredResult
             {
-                PathHash = this.SecondFilePath,
+                Document = this.SecondFilePath,
                 RowNumber = 2,
                 ColNumber = 5
             };
@@ -109,7 +109,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(1);
             result.ColNumber.Should().Be(7);
-            result.PathHash.Should().Be(this.IncludedFilePath);
+            result.Document.Should().Be(this.IncludedFilePath);
         }
 
         [Test]
@@ -126,7 +126,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(1);
             result.ColNumber.Should().Be(7);
-            result.PathHash.Should().Be(this.DeepIncludedFilePath);
+            result.Document.Should().Be(this.DeepIncludedFilePath);
         }
 
         [Test]
@@ -141,7 +141,7 @@ namespace Indexer.Tests
             var result = results.Single();
             result.RowNumber.Should().Be(1);
             result.ColNumber.Should().Be(8);
-            result.PathHash.Should().Be(this.FirstFilePath);
+            result.Document.Should().Be(this.FirstFilePath);
         }
     }
 }

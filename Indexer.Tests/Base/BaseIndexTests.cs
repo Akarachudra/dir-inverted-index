@@ -10,12 +10,12 @@ namespace Indexer.Tests.Base
         [Test]
         public void Can_Add_And_Find_Single_Match()
         {
-            const string path = "Path";
+            const string document = "doc";
             const string word = "te_st";
             var invertedIndex = this.GetNewIndex();
-            var searchResult = new StoredResult { RowNumber = 2, ColNumber = 1, PathHash = path };
+            var searchResult = new StoredResult { RowNumber = 2, ColNumber = 1, Document = document };
 
-            invertedIndex.Add(word, 2, path);
+            invertedIndex.Add(word, 2, document);
 
             invertedIndex.Find(word).Should().BeEquivalentTo(searchResult);
         }
@@ -31,20 +31,20 @@ namespace Indexer.Tests.Base
         [Test]
         public void Can_Find_By_Prefixes_And_Suffixes()
         {
-            const string path = "Path";
+            const string document = "doc";
             const string word = "te_st";
             var invertedIndex = this.GetNewIndex();
-            var searchResult = new StoredResult { RowNumber = 2, ColNumber = 1, PathHash = path };
+            var searchResult = new StoredResult { RowNumber = 2, ColNumber = 1, Document = document };
 
-            invertedIndex.Add(word, 2, path);
+            invertedIndex.Add(word, 2, document);
 
             invertedIndex.Find("te_s").Should().BeEquivalentTo(searchResult);
             invertedIndex.Find("te_").Should().BeEquivalentTo(searchResult);
             invertedIndex.Find("te").Should().BeEquivalentTo(searchResult);
-            invertedIndex.Find("e_st").Should().BeEquivalentTo(new StoredResult { RowNumber = 2, ColNumber = 2, PathHash = path });
-            invertedIndex.Find("_st").Should().BeEquivalentTo(new StoredResult { RowNumber = 2, ColNumber = 3, PathHash = path });
-            invertedIndex.Find("st").Should().BeEquivalentTo(new StoredResult { RowNumber = 2, ColNumber = 4, PathHash = path });
-            invertedIndex.Find("t").Should().BeEquivalentTo(searchResult, new StoredResult { RowNumber = 2, ColNumber = 5, PathHash = path });
+            invertedIndex.Find("e_st").Should().BeEquivalentTo(new StoredResult { RowNumber = 2, ColNumber = 2, Document = document });
+            invertedIndex.Find("_st").Should().BeEquivalentTo(new StoredResult { RowNumber = 2, ColNumber = 3, Document = document });
+            invertedIndex.Find("st").Should().BeEquivalentTo(new StoredResult { RowNumber = 2, ColNumber = 4, Document = document });
+            invertedIndex.Find("t").Should().BeEquivalentTo(searchResult, new StoredResult { RowNumber = 2, ColNumber = 5, Document = document });
         }
 
         [Test]
@@ -74,9 +74,9 @@ namespace Indexer.Tests.Base
         public void Index_Is_Case_Insensitive()
         {
             var invertedIndex = this.GetNewIndex();
-            var expectedResult = new StoredResult { RowNumber = 2, ColNumber = 1, PathHash = "path" };
+            var expectedResult = new StoredResult { RowNumber = 2, ColNumber = 1, Document = "path" };
 
-            invertedIndex.Add("T_e_s_T", expectedResult.RowNumber, expectedResult.PathHash);
+            invertedIndex.Add("T_e_s_T", expectedResult.RowNumber, expectedResult.Document);
 
             invertedIndex.Find("t_E_s_t").Should().BeEquivalentTo(expectedResult);
         }

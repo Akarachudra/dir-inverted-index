@@ -21,12 +21,12 @@ namespace Indexer.Indexes
             this.readComparer = new PrefixStringComparer();
         }
 
-        public void Add(string line, int rowNumber, string pathHash)
+        public void Add(string line, int rowNumber, string document)
         {
             var tokens = this.tokenizer.GetTokens(line);
             foreach (var token in tokens)
             {
-                this.AddToken(token, rowNumber, pathHash);
+                this.AddToken(token, rowNumber, document);
             }
         }
 
@@ -86,7 +86,7 @@ namespace Indexer.Indexes
                         {
                             var expectedNextResult = new StoredResult
                             {
-                                PathHash = storedResult.PathHash,
+                                Document = storedResult.Document,
                                 RowNumber = storedResult.RowNumber,
                                 ColNumber = storedResult.ColNumber + currentOffset
                             };
@@ -110,7 +110,7 @@ namespace Indexer.Indexes
             return resultList;
         }
 
-        private void AddToken(Token token, int rowNumber, string pathHash)
+        private void AddToken(Token token, int rowNumber, string document)
         {
             var startColnumber = token.Position;
             var term = token.Term;
@@ -120,7 +120,7 @@ namespace Indexer.Indexes
                 var storedResult = new StoredResult
                 {
                     ColNumber = startColnumber + i,
-                    PathHash = pathHash,
+                    Document = document,
                     RowNumber = rowNumber
                 };
 
