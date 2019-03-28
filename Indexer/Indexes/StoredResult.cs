@@ -1,6 +1,6 @@
 ﻿using Indexer.Helpers;
 
-namespace Indexer
+namespace Indexer.Indexes
 {
     public class StoredResult
     {

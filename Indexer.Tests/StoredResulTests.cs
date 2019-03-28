@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Indexer.Indexes;
 using NUnit.Framework;
 
 namespace Indexer.Tests

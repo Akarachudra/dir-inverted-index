@@ -4,9 +4,9 @@ using System.Linq;
 using Indexer.Collections;
 using Indexer.Tokens;
 
-namespace Indexer
+namespace Indexer.Indexes
 {
-    public class InvertedIndex
+    public class InvertedIndex : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;
         private readonly SuffixArray<string, HashSet<StoredResult>> suffixArray;
@@ -91,13 +91,8 @@ namespace Indexer
                                 ColNumber = storedResult.ColNumber + currentOffset
                             };
 
-                            var contains = false;
-                            foreach (var set in sets[j])
-                            {
-                                contains = contains | set.Contains(expectedNextResult);
-                            }
-
-                            if (!contains)
+                            var containsPhrase = sets[j].Aggregate(false, (current, set) => current | set.Contains(expectedNextResult));
+                            if (!containsPhrase)
                             {
                                 break;
                             }
@@ -119,7 +114,6 @@ namespace Indexer
         {
             var startColnumber = token.Position;
             var term = token.Term;
-            term = term.ToLowerInvariant();
             var length = term.Length;
             for (var i = 0; i < term.Length; i++)
             {

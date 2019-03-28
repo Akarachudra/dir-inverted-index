@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text.RegularExpressions;
 using Indexer.Helpers;
+using Indexer.Indexes;
 
 namespace Indexer
 {

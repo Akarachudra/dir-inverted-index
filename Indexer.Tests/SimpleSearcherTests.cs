@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using FluentAssertions;
+using Indexer.Indexes;
 using Indexer.Tests.Base;
 using NUnit.Framework;
 

@@ -4,9 +4,9 @@ using System.Linq;
 using Indexer.Helpers;
 using Indexer.Tokens;
 
-namespace Indexer
+namespace Indexer.Indexes
 {
-    public class InvertedHashIndex
+    public class InvertedHashIndex : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;
         private readonly ConcurrentDictionary<int, HashSet<StoredResult>> dictionary;
