@@ -38,7 +38,7 @@ namespace Indexer.Indexes
             {
                 if (this.suffixArray.TryGetValue(tokens[0].Term, out HashSet<StoredResult>[] sets, this.readComparer))
                 {
-                    return ConcatHashSets(sets);
+                    return ConcatHashSetsToList(sets);
                 }
             }
             else
@@ -59,7 +59,7 @@ namespace Indexer.Indexes
             return new List<StoredResult>();
         }
 
-        private static IList<StoredResult> ConcatHashSets(HashSet<StoredResult>[] sets)
+        private static IList<StoredResult> ConcatHashSetsToList(HashSet<StoredResult>[] sets)
         {
             IEnumerable<StoredResult> concated = sets[0];
             for (var i = 1; i < sets.Length; i++)
@@ -78,30 +78,27 @@ namespace Indexer.Indexes
             var currentOffset = suffix.Length;
             for (var x = 0; x < sets[0].Length; x++)
             {
-                for (var i = 0; i < sets[0][x].Count; i++)
+                foreach (var storedResult in sets[0][x])
                 {
-                    foreach (var storedResult in sets[0][x])
+                    for (var j = 1; j < suffixesCount; j++)
                     {
-                        for (var j = 1; j < suffixesCount; j++)
+                        var expectedNextResult = new StoredResult
                         {
-                            var expectedNextResult = new StoredResult
-                            {
-                                Document = storedResult.Document,
-                                RowNumber = storedResult.RowNumber,
-                                ColNumber = storedResult.ColNumber + currentOffset
-                            };
+                            Document = storedResult.Document,
+                            RowNumber = storedResult.RowNumber,
+                            ColNumber = storedResult.ColNumber + currentOffset
+                        };
 
-                            var containsPhrase = sets[j].Aggregate(false, (current, set) => current | set.Contains(expectedNextResult));
-                            if (!containsPhrase)
-                            {
-                                break;
-                            }
+                        var containsPhrase = sets[j].Aggregate(false, (current, set) => current | set.Contains(expectedNextResult));
+                        if (!containsPhrase)
+                        {
+                            break;
+                        }
 
-                            currentOffset += terms[j].Length;
-                            if (j == suffixesCount - 1)
-                            {
-                                resultList.Add(storedResult);
-                            }
+                        currentOffset += terms[j].Length;
+                        if (j == suffixesCount - 1)
+                        {
+                            resultList.Add(storedResult);
                         }
                     }
                 }

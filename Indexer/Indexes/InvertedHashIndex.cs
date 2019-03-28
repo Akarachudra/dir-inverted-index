@@ -94,7 +94,6 @@ namespace Indexer.Indexes
         {
             var startColnumber = token.Position;
             var term = token.Term;
-            term = term.ToLowerInvariant();
             var length = term.Length;
             for (var i = 0; i < term.Length; i++)
             {
