@@ -2,7 +2,7 @@
 using Indexer.Indexes;
 using NUnit.Framework;
 
-namespace Indexer.Tests
+namespace Indexer.Tests.Indexes
 {
     [TestFixture]
     public class StoredResulTests

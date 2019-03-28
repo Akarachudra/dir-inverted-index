@@ -3,7 +3,7 @@ using FluentAssertions;
 using Indexer.Collections;
 using NUnit.Framework;
 
-namespace Indexer.Tests
+namespace Indexer.Tests.Collections
 {
     [TestFixture]
     public class PrefixStringComparerTests
