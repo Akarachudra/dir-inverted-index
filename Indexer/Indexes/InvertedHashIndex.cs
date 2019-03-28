@@ -102,17 +102,17 @@ namespace Indexer.Indexes
                 RowNumber = rowNumber
             };
             this.AddTerm(term, prefixStoredResult);
-            for (var i = 0; i < term.Length - 1; i++)
+            for (var i = 1; i < term.Length; i++)
             {
                 var suffixStoredResult = new StoredResult
                 {
-                    ColNumber = startColNumber + i + 1,
+                    ColNumber = startColNumber + i,
                     Document = document,
                     RowNumber = rowNumber
                 };
 
-                var suffix = term.Substring(i + 1, length - i - 1);
-                var prefix = term.Substring(0, i + 1);
+                var suffix = term.Substring(i, length - i);
+                var prefix = term.Substring(0, i);
                 this.AddTerm(suffix, suffixStoredResult);
                 this.AddTerm(prefix, prefixStoredResult);
             }

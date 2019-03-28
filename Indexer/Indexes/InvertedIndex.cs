@@ -109,14 +109,14 @@ namespace Indexer.Indexes
 
         private void AddToken(Token token, int rowNumber, string document)
         {
-            var startColnumber = token.Position;
+            var startColNumber = token.Position;
             var term = token.Term;
             var length = term.Length;
             for (var i = 0; i < term.Length; i++)
             {
                 var storedResult = new StoredResult
                 {
-                    ColNumber = startColnumber + i,
+                    ColNumber = startColNumber + i,
                     Document = document,
                     RowNumber = rowNumber
                 };
