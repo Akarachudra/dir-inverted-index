@@ -3,16 +3,18 @@ using Indexer.Indexes;
 
 namespace Indexer
 {
-    public class IndexedSearcher : ISearchService
+    public class IndexedSearcher : IDirectorySearcher
     {
         private readonly string filesPath;
+        private readonly IInvertedIndex index;
 
-        public IndexedSearcher(string filesPath)
+        public IndexedSearcher(string filesPath, IInvertedIndex index)
         {
             this.filesPath = filesPath;
+            this.index = index;
         }
 
-        public IList<StoredResult> Find(string term)
+        public IList<StoredResult> Find(string phrase)
         {
             throw new System.NotImplementedException();
         }

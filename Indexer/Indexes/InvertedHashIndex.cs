@@ -92,46 +92,41 @@ namespace Indexer.Indexes
 
         private void AddToken(Token token, int rowNumber, string document)
         {
-            var startColnumber = token.Position;
+            var startColNumber = token.Position;
             var term = token.Term;
             var length = term.Length;
-            for (var i = 0; i < term.Length; i++)
+            var prefixStoredResult = new StoredResult
             {
-                var storedResult = new StoredResult
-                {
-                    ColNumber = startColnumber + i,
-                    Document = document,
-                    RowNumber = rowNumber
-                };
-
-                var suffix = term.Substring(i, length - i);
-                var hashCode = StringHelper.GetHashCode(suffix);
-                if (!this.dictionary.ContainsKey(hashCode))
-                {
-                    this.dictionary.TryAdd(hashCode, new HashSet<StoredResult>());
-                }
-
-                this.dictionary[hashCode].Add(storedResult);
-            }
-
+                ColNumber = startColNumber,
+                Document = document,
+                RowNumber = rowNumber
+            };
+            this.AddTerm(term, prefixStoredResult);
             for (var i = 0; i < term.Length - 1; i++)
             {
-                var storedResult = new StoredResult
+                var suffixStoredResult = new StoredResult
                 {
-                    ColNumber = startColnumber,
+                    ColNumber = startColNumber + i + 1,
                     Document = document,
                     RowNumber = rowNumber
                 };
 
-                var suffix = term.Substring(0, i + 1);
-                var hashCode = StringHelper.GetHashCode(suffix);
-                if (!this.dictionary.ContainsKey(hashCode))
-                {
-                    this.dictionary.TryAdd(hashCode, new HashSet<StoredResult>());
-                }
-
-                this.dictionary[hashCode].Add(storedResult);
+                var suffix = term.Substring(i + 1, length - i - 1);
+                var prefix = term.Substring(0, i + 1);
+                this.AddTerm(suffix, suffixStoredResult);
+                this.AddTerm(prefix, prefixStoredResult);
             }
+        }
+
+        private void AddTerm(string term, StoredResult result)
+        {
+            var hashCode = StringHelper.GetHashCode(term);
+            if (!this.dictionary.ContainsKey(hashCode))
+            {
+                this.dictionary.TryAdd(hashCode, new HashSet<StoredResult>());
+            }
+
+            this.dictionary[hashCode].Add(result);
         }
     }
 }

@@ -29,6 +29,19 @@ namespace Indexer.Tests.Base
         }
 
         [Test]
+        public void Can_Find_Single_Char_Word()
+        {
+            const string document = "doc";
+            const string word = "c";
+            var invertedIndex = this.GetNewIndex();
+            var searchResult = new StoredResult { RowNumber = 2, ColNumber = 1, Document = document };
+
+            invertedIndex.Add(word, 2, document);
+
+            invertedIndex.Find("c").Should().BeEquivalentTo(searchResult);
+        }
+
+        [Test]
         public void Can_Find_By_Prefixes_And_Suffixes()
         {
             const string document = "doc";

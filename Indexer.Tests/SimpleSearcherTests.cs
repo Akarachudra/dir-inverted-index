@@ -11,7 +11,7 @@ namespace Indexer.Tests
     [TestFixture]
     public class SimpleSearcherTests : TestsBase
     {
-        private readonly ISearchService simpleSearcher;
+        private readonly IDirectorySearcher simpleSearcher;
 
         public SimpleSearcherTests()
         {

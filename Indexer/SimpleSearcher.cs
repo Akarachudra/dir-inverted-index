@@ -6,7 +6,7 @@ using Indexer.Indexes;
 
 namespace Indexer
 {
-    public class SimpleSearcher : ISearchService
+    public class SimpleSearcher : IDirectorySearcher
     {
         private readonly string filesPath;
 
@@ -15,7 +15,7 @@ namespace Indexer
             this.filesPath = filesPath;
         }
 
-        public IList<StoredResult> Find(string term)
+        public IList<StoredResult> Find(string phrase)
         {
             var result = new List<StoredResult>();
             var files = FileHelper.GetAllFiles(this.filesPath);
@@ -25,7 +25,7 @@ namespace Indexer
 
                 foreach (var line in File.ReadLines(file.FullName))
                 {
-                    foreach (Match match in Regex.Matches(line, term, RegexOptions.IgnoreCase))
+                    foreach (Match match in Regex.Matches(line, phrase, RegexOptions.IgnoreCase))
                     {
                         result.Add(
                             new StoredResult
