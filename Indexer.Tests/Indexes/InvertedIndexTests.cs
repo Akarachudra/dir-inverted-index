@@ -13,7 +13,7 @@ namespace Indexer.Tests.Indexes
         public void Can_Find_Phrase_With_Additional_Spaces_And_Symbols()
         {
             const string additionalPhrase = "As.  phrase   ! ";
-            var invertedIndex = new InvertedIndex(new CodeTokenizer());
+            var invertedIndex = new InvertedIndex(new DefaultTokenizer());
             invertedIndex.Add(additionalPhrase, 0, null);
 
             invertedIndex.Find("as").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 }, new StoredResult { ColNumber = 9 });
@@ -27,7 +27,7 @@ namespace Indexer.Tests.Indexes
 
         protected override IInvertedIndex GetNewIndex()
         {
-            return new InvertedIndex(new CodeTokenizer());
+            return new InvertedIndex(new DefaultTokenizer());
         }
     }
 }

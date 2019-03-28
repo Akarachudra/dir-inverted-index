@@ -10,7 +10,7 @@ namespace Indexer.Tests.Indexes
     {
         protected override IInvertedIndex GetNewIndex()
         {
-            return new InvertedHashIndex(new CodeTokenizer());
+            return new InvertedHashIndex(new DefaultTokenizer());
         }
     }
 }

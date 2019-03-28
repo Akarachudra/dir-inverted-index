@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Indexer.Tokens
 {
-    public class CodeTokenizer : ITokenizer
+    public class DefaultTokenizer : ITokenizer
     {
         public IList<Token> GetTokens(string s)
         {

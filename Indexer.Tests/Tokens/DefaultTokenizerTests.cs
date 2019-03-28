@@ -5,13 +5,13 @@ using NUnit.Framework;
 namespace Indexer.Tests.Tokens
 {
     [TestFixture]
-    public class CodeTokenizerTests
+    public class DefaultTokenizerTests
     {
         [Test]
         public void Get_Tokens_With_Single_Spaces()
         {
             const string s = "it a test phrase";
-            var tokenizer = new CodeTokenizer();
+            var tokenizer = new DefaultTokenizer();
 
             var tokens = tokenizer.GetTokens(s);
 
@@ -25,7 +25,7 @@ namespace Indexer.Tests.Tokens
         public void Get_Tokens_With_Additional_Spaces()
         {
             const string s = "  et  !.   as ";
-            var tokenizer = new CodeTokenizer();
+            var tokenizer = new DefaultTokenizer();
 
             var tokens = tokenizer.GetTokens(s);
 
@@ -39,7 +39,7 @@ namespace Indexer.Tests.Tokens
         public void Terms_Converted_To_Lower_Case()
         {
             const string s = "TeSt";
-            var tokenizer = new CodeTokenizer();
+            var tokenizer = new DefaultTokenizer();
 
             var tokens = tokenizer.GetTokens(s);
 

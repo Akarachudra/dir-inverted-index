@@ -76,9 +76,9 @@ namespace Indexer.Indexes
             var suffixesCount = terms.Length;
             var suffix = terms[0];
             var currentOffset = suffix.Length;
-            for (var x = 0; x < sets[0].Length; x++)
+            for (var i = 0; i < sets[0].Length; i++)
             {
-                foreach (var storedResult in sets[0][x])
+                foreach (var storedResult in sets[0][i])
                 {
                     for (var j = 1; j < suffixesCount; j++)
                     {
