@@ -1,24 +1,20 @@
-﻿using System;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Indexer.Collections;
+using Indexer.Helpers;
 using Indexer.Tokens;
 
 namespace Indexer
 {
-    public class InvertedIndex
+    public class InvertedHashIndex
     {
         private readonly ITokenizer tokenizer;
-        private readonly SuffixArray<string, HashSet<StoredResult>> suffixArray;
-        private readonly IComparer<string> insertComparer;
-        private readonly IComparer<string> readComparer;
+        private readonly ConcurrentDictionary<int, HashSet<StoredResult>> dictionary;
 
-        public InvertedIndex(ITokenizer tokenizer)
+        public InvertedHashIndex(ITokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
-            this.suffixArray = new SuffixArray<string, HashSet<StoredResult>>();
-            this.insertComparer = StringComparer.Ordinal;
-            this.readComparer = new PrefixStringComparer();
+            this.dictionary = new ConcurrentDictionary<int, HashSet<StoredResult>>();
         }
 
         public void Add(string line, int rowNumber, string pathHash)
@@ -36,9 +32,9 @@ namespace Indexer
             var count = tokens.Count;
             if (count == 1)
             {
-                if (this.suffixArray.TryGetValue(tokens[0].Term, out var set, this.readComparer))
+                if (this.dictionary.TryGetValue(StringHelper.GetHashCode(tokens[0].Term), out var hashSet))
                 {
-                    return set.ToList();
+                    return hashSet.ToList();
                 }
             }
             else
@@ -47,7 +43,7 @@ namespace Indexer
                 for (var i = 0; i < count; i++)
                 {
                     var term = tokens[i].Term;
-                    if (!this.suffixArray.TryGetValue(term, out sets[i], this.readComparer))
+                    if (!this.dictionary.TryGetValue(StringHelper.GetHashCode(term), out sets[i]))
                     {
                         return new List<StoredResult>();
                     }
@@ -110,14 +106,32 @@ namespace Indexer
                 };
 
                 var suffix = term.Substring(i, length - i);
-                if (!this.suffixArray.TryGetValue(suffix, out var set, this.insertComparer))
+                var hashCode = StringHelper.GetHashCode(suffix);
+                if (!this.dictionary.ContainsKey(hashCode))
                 {
-                    this.suffixArray.TryAdd(suffix, new HashSet<StoredResult> { storedResult }, this.insertComparer);
+                    this.dictionary.TryAdd(hashCode, new HashSet<StoredResult>());
                 }
-                else
+
+                this.dictionary[hashCode].Add(storedResult);
+            }
+
+            for (var i = 0; i < term.Length - 1; i++)
+            {
+                var storedResult = new StoredResult
                 {
-                    set.Add(storedResult);
+                    ColNumber = startColnumber,
+                    PathHash = pathHash,
+                    RowNumber = rowNumber
+                };
+
+                var suffix = term.Substring(0, i + 1);
+                var hashCode = StringHelper.GetHashCode(suffix);
+                if (!this.dictionary.ContainsKey(hashCode))
+                {
+                    this.dictionary.TryAdd(hashCode, new HashSet<StoredResult>());
                 }
+
+                this.dictionary[hashCode].Add(storedResult);
             }
         }
     }
