@@ -5,5 +5,7 @@
         public string Term { get; set; }
 
         public int Position { get; set; }
+
+        public int DistanceToNext { get; set; }
     }
 }

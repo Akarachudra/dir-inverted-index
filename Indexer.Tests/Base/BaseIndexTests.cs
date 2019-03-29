@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Collections.Generic;
+using FluentAssertions;
 using Indexer.Indexes;
 using NUnit.Framework;
 
@@ -73,14 +74,52 @@ namespace Indexer.Tests.Base
         }
 
         [Test]
-        public void Can_Find_Wrapped_By_Spaces_Word()
+        public void Can_Find_With_Several_Spaces_In_Middle_At_Phrase()
+        {
+            const string simplePhrase = "some   phrase";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(simplePhrase, 0, null);
+
+            invertedIndex.Find("ome   phra").Should().BeEquivalentTo(new StoredResult { ColNumber = 2 });
+            invertedIndex.Find("ome  phr").Should().BeEmpty();
+        }
+
+        [Test]
+        public void Before_And_After_Spaces_Are_Ignored()
         {
             const string word = "  test  ";
             var invertedIndex = this.GetNewIndex();
+            var expectedResults = new List<StoredResult> { new StoredResult { ColNumber = 3 }, new StoredResult { ColNumber = 6 } };
             invertedIndex.Add(word, 0, null);
 
-            invertedIndex.Find("  t").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 });
-            invertedIndex.Find("t  ").Should().BeEquivalentTo(new StoredResult { ColNumber = 6 });
+            invertedIndex.Find("  t").Should().BeEquivalentTo(expectedResults);
+            invertedIndex.Find("t  ").Should().BeEquivalentTo(expectedResults);
+            invertedIndex.Find("t ").Should().BeEquivalentTo(expectedResults);
+            invertedIndex.Find(" t").Should().BeEquivalentTo(expectedResults);
+            invertedIndex.Find(" ").Should().BeEmpty();
+        }
+
+        [Test]
+        public void Queries_With_Spaces_Only_Are_Ignored()
+        {
+            const string word = "   test   ";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(word, 0, null);
+
+            invertedIndex.Find(" ").Should().BeEmpty();
+            invertedIndex.Find("  ").Should().BeEmpty();
+            invertedIndex.Find("   ").Should().BeEmpty();
+        }
+
+        [Test]
+        public void Null_And_Empty_Queries_Are_Ignored()
+        {
+            const string word = "   test   ";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(word, 0, null);
+
+            invertedIndex.Find(string.Empty).Should().BeEmpty();
+            invertedIndex.Find(null).Should().BeEmpty();
         }
 
         [Test]

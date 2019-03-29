@@ -8,24 +8,46 @@ namespace Indexer.Tokens
         public IList<Token> GetTokens(string s)
         {
             var tokens = new List<Token>();
+            if (string.IsNullOrEmpty(s))
+            {
+                return tokens;
+            }
+
             var term = new StringBuilder();
             var termIndex = 0;
             var previousIsSpace = true;
+            var previousToken = new Token();
             for (var i = 0; i < s.Length; i++)
             {
                 var c = char.ToLowerInvariant(s[i]);
                 if (c == ' ' && !previousIsSpace)
                 {
-                    tokens.Add(new Token { Term = term.ToString(), Position = termIndex + 1 });
-                    termIndex = i;
+                    var position = termIndex + 1;
+                    previousToken.DistanceToNext = position - previousToken.Position;
+                    var token = new Token { Term = term.ToString(), Position = position };
+                    tokens.Add(token);
+                    previousToken = token;
                     term.Clear();
                 }
 
-                term.Append(c);
-                previousIsSpace = c == ' ';
+                if (c == ' ')
+                {
+                    termIndex = i + 1;
+                    previousIsSpace = true;
+                }
+                else
+                {
+                    term.Append(c);
+                    previousIsSpace = false;
+                }
             }
 
-            tokens.Add(new Token { Term = term.ToString(), Position = termIndex + 1 });
+            if (!previousIsSpace)
+            {
+                var position = termIndex + 1;
+                previousToken.DistanceToNext = position - previousToken.Position;
+                tokens.Add(new Token { Term = term.ToString(), Position = position });
+            }
 
             return tokens;
         }

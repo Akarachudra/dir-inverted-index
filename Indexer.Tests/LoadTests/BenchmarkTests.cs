@@ -56,16 +56,16 @@ namespace Indexer.Tests.LoadTests
         [Test]
         public void InvertedIndex_Should_Be_Faster_Than_Simple_Searching()
         {
-            const int phrasesCount = 100;
+            const int phrasesCount = 1;
             var phrases = new string[phrasesCount];
             for (var i = 0; i < phrasesCount; i++)
             {
-                phrases[i] = TestDataGenerator.GetSearchPhrase(Environment.TickCount);
+                phrases[i] = "var i";
             }
 
             var tokenizer = new DefaultTokenizer();
             var stopWatch = new Stopwatch();
-            var lines = TestDataGenerator.GetRandomLines(Environment.TickCount, 40000);
+            var lines = TestDataGenerator.GetRandomLines(100, 20000);
             var invertedIndex = new InvertedIndex(tokenizer);
             BuildIndex(invertedIndex, lines);
 

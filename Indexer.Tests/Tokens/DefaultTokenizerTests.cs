@@ -15,10 +15,11 @@ namespace Indexer.Tests.Tokens
 
             var tokens = tokenizer.GetTokens(s);
 
-            tokens[0].Should().BeEquivalentTo(new Token { Term = "it", Position = 1 });
-            tokens[1].Should().BeEquivalentTo(new Token { Term = " a", Position = 3 });
-            tokens[2].Should().BeEquivalentTo(new Token { Term = " test", Position = 5 });
-            tokens[3].Should().BeEquivalentTo(new Token { Term = " phrase", Position = 10 });
+            tokens.Count.Should().Be(4);
+            tokens[0].Should().BeEquivalentTo(new Token { Term = "it", Position = 1, DistanceToNext = 3 });
+            tokens[1].Should().BeEquivalentTo(new Token { Term = "a", Position = 4, DistanceToNext = 2 });
+            tokens[2].Should().BeEquivalentTo(new Token { Term = "test", Position = 6, DistanceToNext = 5 });
+            tokens[3].Should().BeEquivalentTo(new Token { Term = "phrase", Position = 11, DistanceToNext = 0 });
         }
 
         [Test]
@@ -29,10 +30,10 @@ namespace Indexer.Tests.Tokens
 
             var tokens = tokenizer.GetTokens(s);
 
-            tokens[0].Should().BeEquivalentTo(new Token { Term = "  et", Position = 1 });
-            tokens[1].Should().BeEquivalentTo(new Token { Term = "  !.", Position = 5 });
-            tokens[2].Should().BeEquivalentTo(new Token { Term = "   as", Position = 9 });
-            tokens[3].Should().BeEquivalentTo(new Token { Term = " ", Position = 14 });
+            tokens.Count.Should().Be(3);
+            tokens[0].Should().BeEquivalentTo(new Token { Term = "et", Position = 3, DistanceToNext = 4 });
+            tokens[1].Should().BeEquivalentTo(new Token { Term = "!.", Position = 7, DistanceToNext = 5 });
+            tokens[2].Should().BeEquivalentTo(new Token { Term = "as", Position = 12, DistanceToNext = 0 });
         }
 
         [Test]
@@ -43,7 +44,20 @@ namespace Indexer.Tests.Tokens
 
             var tokens = tokenizer.GetTokens(s);
 
-            tokens.Should().BeEquivalentTo(new Token { Term = "test", Position = 1 });
+            tokens.Count.Should().Be(1);
+            tokens.Should().BeEquivalentTo(new Token { Term = "test", Position = 1, DistanceToNext = 0 });
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("   ")]
+        public void Return_Empty_List_For_Null_Or_WhiteSpace_String(string s)
+        {
+            var tokenizer = new DefaultTokenizer();
+
+            var tokens = tokenizer.GetTokens(s);
+
+            tokens.Should().BeEmpty();
         }
     }
 }

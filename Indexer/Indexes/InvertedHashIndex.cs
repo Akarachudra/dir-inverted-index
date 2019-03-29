@@ -28,8 +28,14 @@ namespace Indexer.Indexes
 
         public IList<StoredResult> Find(string query)
         {
+            var emptyResult = new List<StoredResult>();
             var tokens = this.tokenizer.GetTokens(query);
             var count = tokens.Count;
+            if (count == 0)
+            {
+                return emptyResult;
+            }
+
             if (count == 1)
             {
                 if (this.dictionary.TryGetValue(StringHelper.GetHashCode(tokens[0].Term), out var hashSet))
@@ -49,18 +55,17 @@ namespace Indexer.Indexes
                     }
                 }
 
-                return GetPhraseMatches(tokens.Select(x => x.Term).ToArray(), sets);
+                return GetPhraseMatches(tokens, sets);
             }
 
             return new List<StoredResult>();
         }
 
-        private static IList<StoredResult> GetPhraseMatches(string[] terms, HashSet<StoredResult>[] sets)
+        private static IList<StoredResult> GetPhraseMatches(IList<Token> tokens, HashSet<StoredResult>[] sets)
         {
             var resultList = new List<StoredResult>();
-            var suffixesCount = terms.Length;
-            var suffix = terms[0];
-            var currentOffset = suffix.Length;
+            var suffixesCount = tokens.Count;
+            var currentOffset = tokens[0].DistanceToNext;
             for (var i = 0; i < sets[0].Count; i++)
             {
                 foreach (var storedResult in sets[0])
@@ -78,7 +83,7 @@ namespace Indexer.Indexes
                             break;
                         }
 
-                        currentOffset += terms[j].Length;
+                        currentOffset += tokens[j].DistanceToNext;
                         if (j == suffixesCount - 1)
                         {
                             resultList.Add(storedResult);

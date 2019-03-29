@@ -10,15 +10,15 @@ namespace Indexer.Indexes
     {
         private readonly ITokenizer tokenizer;
         private readonly SuffixArray<string, HashSet<StoredResult>> suffixArray;
-        private readonly IComparer<string> insertComparer;
-        private readonly IComparer<string> readComparer;
+        private readonly IComparer<string> matchComparer;
+        private readonly IComparer<string> prefixComparer;
 
         public InvertedIndex(ITokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
             this.suffixArray = new SuffixArray<string, HashSet<StoredResult>>();
-            this.insertComparer = StringComparer.Ordinal;
-            this.readComparer = new PrefixStringComparer();
+            this.matchComparer = StringComparer.Ordinal;
+            this.prefixComparer = new PrefixStringComparer();
         }
 
         public void Add(string line, int rowNumber, string document)
@@ -32,31 +32,44 @@ namespace Indexer.Indexes
 
         public IList<StoredResult> Find(string query)
         {
+            var emptyResult = new List<StoredResult>();
             var tokens = this.tokenizer.GetTokens(query);
             var count = tokens.Count;
+            if (count == 0)
+            {
+                return emptyResult;
+            }
+
             if (count == 1)
             {
-                if (this.suffixArray.TryGetValue(tokens[0].Term, out HashSet<StoredResult>[] sets, this.readComparer))
+                if (this.suffixArray.TryGetValue(tokens[0].Term, out HashSet<StoredResult>[] sets, this.prefixComparer))
                 {
                     return ConcatHashSetsToList(sets);
                 }
             }
             else
             {
+                var lastIndex = count - 1;
                 var sets = new HashSet<StoredResult>[count][];
                 for (var i = 0; i < count; i++)
                 {
                     var term = tokens[i].Term;
-                    if (!this.suffixArray.TryGetValue(term, out sets[i], this.readComparer))
+                    var comparer = this.matchComparer;
+                    if (i == lastIndex)
                     {
-                        return new List<StoredResult>();
+                        comparer = this.prefixComparer;
+                    }
+
+                    if (!this.suffixArray.TryGetValue(term, out sets[i], comparer))
+                    {
+                        return emptyResult;
                     }
                 }
 
-                return GetPhraseMatches(tokens.Select(x => x.Term).ToArray(), sets);
+                return GetPhraseMatches(tokens, sets);
             }
 
-            return new List<StoredResult>();
+            return emptyResult;
         }
 
         private static IList<StoredResult> ConcatHashSetsToList(HashSet<StoredResult>[] sets)
@@ -70,12 +83,11 @@ namespace Indexer.Indexes
             return concated.ToList();
         }
 
-        private static IList<StoredResult> GetPhraseMatches(string[] terms, HashSet<StoredResult>[][] sets)
+        private static IList<StoredResult> GetPhraseMatches(IList<Token> tokens, HashSet<StoredResult>[][] sets)
         {
             var resultList = new List<StoredResult>();
-            var suffixesCount = terms.Length;
-            var suffix = terms[0];
-            var currentOffset = suffix.Length;
+            var suffixesCount = tokens.Count;
+            var currentOffset = tokens[0].DistanceToNext;
             for (var i = 0; i < sets[0].Length; i++)
             {
                 foreach (var storedResult in sets[0][i])
@@ -95,7 +107,7 @@ namespace Indexer.Indexes
                             break;
                         }
 
-                        currentOffset += terms[j].Length;
+                        currentOffset += tokens[j].DistanceToNext;
                         if (j == suffixesCount - 1)
                         {
                             resultList.Add(storedResult);
@@ -122,9 +134,9 @@ namespace Indexer.Indexes
                 };
 
                 var suffix = term.Substring(i, length - i);
-                if (!this.suffixArray.TryGetValue(suffix, out HashSet<StoredResult> set, this.insertComparer))
+                if (!this.suffixArray.TryGetValue(suffix, out HashSet<StoredResult> set, this.matchComparer))
                 {
-                    this.suffixArray.TryAdd(suffix, new HashSet<StoredResult> { storedResult }, this.insertComparer);
+                    this.suffixArray.TryAdd(suffix, new HashSet<StoredResult> { storedResult }, this.matchComparer);
                 }
                 else
                 {

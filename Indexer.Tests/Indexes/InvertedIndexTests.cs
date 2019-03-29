@@ -19,8 +19,8 @@ namespace Indexer.Tests.Indexes
             invertedIndex.Find("as").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 }, new StoredResult { ColNumber = 9 });
             invertedIndex.Find("As.  ").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 });
             invertedIndex.Find("rase   ").Should().BeEquivalentTo(new StoredResult { ColNumber = 8 });
-            invertedIndex.Find("  phrase   ").Should().BeEquivalentTo(new StoredResult { ColNumber = 4 });
-            invertedIndex.Find(" !").Should().BeEquivalentTo(new StoredResult { ColNumber = 14 });
+            invertedIndex.Find("  phrase   ").Should().BeEquivalentTo(new StoredResult { ColNumber = 6 });
+            invertedIndex.Find(" !").Should().BeEquivalentTo(new StoredResult { ColNumber = 15 });
             invertedIndex.Find("!").Should().BeEquivalentTo(new StoredResult { ColNumber = 15 });
             invertedIndex.Find("! ").Should().BeEquivalentTo(new StoredResult { ColNumber = 15 });
         }

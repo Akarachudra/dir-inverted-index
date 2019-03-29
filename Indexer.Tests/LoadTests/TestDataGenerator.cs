@@ -7,9 +7,9 @@ namespace Indexer.Tests.LoadTests
     {
         public static string[] Terms = new[]
         {
-            "program", " ", "var", "const", ".", "class", "interface", "Method", "int", "string", "static", "  ", ";", "IList<>", "Dictionary",
-            "Concurrent", "System", "using", "i", "++", "namespace", "true", "false", "for", "ToString", "char", "=", ">", "<", "==",
-            "return", "Get", "PROGRAM", "VAR", "CONST", "CLASS", "INTERFACE", "FOR", "BREAK", "CONTINUE"
+            "program", "var", "const", "class", "interface", "Method", "int", "string", "static", "IList", "Dictionary",
+            "Concurrent", "System", "using", "i", "namespace", "true", "false", "for", "ToString", "char", "return", "Get", "PROGRAM", "VAR", "CONST", "CLASS",
+            "INTERFACE", "FOR", "BREAK", "CONTINUE", "INTERF0CE", "Pr0gram", "us1ng"
         };
 
         public static string[] GetRandomLines(int seed, int linesCount = 5000)
@@ -23,7 +23,8 @@ namespace Indexer.Tests.LoadTests
                 for (var j = 0; j < termsCount; j++)
                 {
                     var term = Terms[random.Next(Terms.Length)];
-                    strBuilder.Append(term);
+                    var tail = Convert.ToBoolean(random.Next(0, 1)) ? " " : string.Empty;
+                    strBuilder.Append(term + tail);
                 }
 
                 lines[i] = strBuilder.ToString();
@@ -41,7 +42,8 @@ namespace Indexer.Tests.LoadTests
             for (var j = 0; j < termsCount; j++)
             {
                 var term = Terms[random.Next(Terms.Length)];
-                strBuilder.Append(term);
+                var space = j < termsCount - 1 ? " " : string.Empty;
+                strBuilder.Append(term + space);
             }
 
             return strBuilder.ToString();
