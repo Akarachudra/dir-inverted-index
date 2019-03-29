@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Generic;
 using Indexer.Indexes;
 
 namespace Indexer.Tests.LoadTests
@@ -13,12 +13,12 @@ namespace Indexer.Tests.LoadTests
 
             foreach (var line in lines)
             {
-                foreach (Match match in Regex.Matches(line, phrase, RegexOptions.IgnoreCase))
+                foreach (var index in AllIndexesOf(line, phrase))
                 {
                     result.Add(
                         new StoredResult
                         {
-                            ColNumber = match.Index + 1,
+                            ColNumber = index + 1,
                             RowNumber = rowNumber
                         });
                 }
@@ -27,6 +27,16 @@ namespace Indexer.Tests.LoadTests
             }
 
             return result;
+        }
+
+        private static IEnumerable<int> AllIndexesOf(string str, string searchstring)
+        {
+            var minIndex = str.IndexOf(searchstring, StringComparison.OrdinalIgnoreCase);
+            while (minIndex != -1)
+            {
+                yield return minIndex;
+                minIndex = str.IndexOf(searchstring, minIndex + searchstring.Length, StringComparison.OrdinalIgnoreCase);
+            }
         }
     }
 }
