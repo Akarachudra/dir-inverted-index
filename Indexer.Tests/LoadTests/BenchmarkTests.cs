@@ -12,6 +12,7 @@ namespace Indexer.Tests.LoadTests
     public class BenchmarkTests : TestsBase
     {
         [Test]
+        [Ignore("To slow")]
         public void Indexes_Build_Time()
         {
             const int buildTimes = 5;
@@ -54,13 +55,14 @@ namespace Indexer.Tests.LoadTests
         }
 
         [Test]
+        [Ignore("To slow")]
         public void InvertedIndex_Should_Be_Faster_Than_Simple_Searching()
         {
             const int phrasesCount = 1;
             var phrases = new string[phrasesCount];
             for (var i = 0; i < phrasesCount; i++)
             {
-                phrases[i] = "var i";
+                phrases[i] = "var i program";
             }
 
             var tokenizer = new DefaultTokenizer();
