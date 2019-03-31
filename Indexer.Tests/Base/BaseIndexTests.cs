@@ -123,6 +123,25 @@ namespace Indexer.Tests.Base
         }
 
         [Test]
+        public void Can_Find_All_Matches_With_Same_Suffixes()
+        {
+            const string firstPhrase = "some program interface";
+            const string secondPhrase = "some program int";
+            const string thirdPhrase = "some program int32";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(firstPhrase, 0, firstPhrase);
+            invertedIndex.Add(secondPhrase, 0, secondPhrase);
+            invertedIndex.Add(thirdPhrase, 0, thirdPhrase);
+
+            invertedIndex.Find("some program int")
+                         .Should()
+                         .BeEquivalentTo(
+                             new StoredResult { ColNumber = 1, Document = firstPhrase },
+                             new StoredResult { ColNumber = 1, Document = secondPhrase },
+                             new StoredResult { ColNumber = 1, Document = thirdPhrase });
+        }
+
+        [Test]
         public void Index_Is_Case_Insensitive()
         {
             var invertedIndex = this.GetNewIndex();
