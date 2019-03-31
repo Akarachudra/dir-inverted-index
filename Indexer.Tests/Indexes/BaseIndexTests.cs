@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using FluentAssertions;
 using Indexer.Indexes;
+using Indexer.Tests.Base;
 using NUnit.Framework;
 
-namespace Indexer.Tests.Base
+namespace Indexer.Tests.Indexes
 {
     [TestFixture]
     public abstract class BaseIndexTests : TestsBase

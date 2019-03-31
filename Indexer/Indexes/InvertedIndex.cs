@@ -23,7 +23,6 @@ namespace Indexer.Indexes
             this.matchComparer = StringComparer.Ordinal;
             this.prefixComparer = new PrefixStringComparer();
             this.addLock = new object();
-            var list = new List<string>();
         }
 
         public void Add(string line, int rowNumber, string document)

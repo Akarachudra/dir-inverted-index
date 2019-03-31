@@ -3,19 +3,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Indexer.Indexes;
-using Indexer.Tokens;
+using Indexer.Tests.Base;
 using NUnit.Framework;
 
 namespace Indexer.Tests.LoadTests
 {
     [TestFixture]
-    public class MultiThreadedTests
+    public abstract class BaseMultiThreadedTests : TestsBase
     {
         [Test]
         public void Add_And_Read_Simultaneously()
         {
             var exceptionsCount = 0;
-            var index = new InvertedIndex(new DefaultTokenizer());
+            var index = this.GetNewIndex();
             Action addAction = () =>
             {
                 try
@@ -68,5 +68,7 @@ namespace Indexer.Tests.LoadTests
 
             exceptionsCount.Should().Be(0);
         }
+
+        protected abstract IInvertedIndex GetNewIndex();
     }
 }

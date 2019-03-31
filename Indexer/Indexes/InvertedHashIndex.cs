@@ -9,12 +9,12 @@ namespace Indexer.Indexes
     public class InvertedHashIndex : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;
-        private readonly ConcurrentDictionary<int, HashSet<StoredResult>> dictionary;
+        private readonly ConcurrentDictionary<int, ConcurrentDictionary<StoredResult, byte>> dictionary;
 
         public InvertedHashIndex(ITokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
-            this.dictionary = new ConcurrentDictionary<int, HashSet<StoredResult>>();
+            this.dictionary = new ConcurrentDictionary<int, ConcurrentDictionary<StoredResult, byte>>();
         }
 
         public void Add(string line, int rowNumber, string document)
@@ -38,35 +38,36 @@ namespace Indexer.Indexes
 
             if (count == 1)
             {
-                if (this.dictionary.TryGetValue(StringHelper.GetHashCode(tokens[0].Term), out var hashSet))
+                if (this.dictionary.TryGetValue(StringHelper.GetHashCode(tokens[0].Term), out var dictionary))
                 {
-                    return hashSet.ToList();
+                    return dictionary.Keys.ToList();
                 }
             }
             else
             {
-                var sets = new HashSet<StoredResult>[count];
+                var dictionaries = new ConcurrentDictionary<StoredResult, byte>[count];
                 for (var i = 0; i < count; i++)
                 {
                     var term = tokens[i].Term;
-                    if (!this.dictionary.TryGetValue(StringHelper.GetHashCode(term), out sets[i]))
+                    if (!this.dictionary.TryGetValue(StringHelper.GetHashCode(term), out dictionaries[i]))
                     {
                         return new List<StoredResult>();
                     }
                 }
 
-                return GetPhraseMatches(tokens, sets);
+                return GetPhraseMatches(tokens, dictionaries);
             }
 
             return new List<StoredResult>();
         }
 
-        private static IList<StoredResult> GetPhraseMatches(IList<Token> tokens, HashSet<StoredResult>[] sets)
+        private static IList<StoredResult> GetPhraseMatches(IList<Token> tokens, ConcurrentDictionary<StoredResult, byte>[] dictionaries)
         {
             var resultList = new List<StoredResult>();
             var suffixesCount = tokens.Count;
-            foreach (var storedResult in sets[0])
+            foreach (var e in dictionaries[0])
             {
+                var storedResult = e.Key;
                 var currentOffset = tokens[0].DistanceToNext;
                 for (var j = 1; j < suffixesCount; j++)
                 {
@@ -76,7 +77,7 @@ namespace Indexer.Indexes
                         RowNumber = storedResult.RowNumber,
                         ColNumber = storedResult.ColNumber + currentOffset
                     };
-                    if (!sets[j].Contains(expectedNextResult))
+                    if (!dictionaries[j].ContainsKey(expectedNextResult))
                     {
                         break;
                     }
@@ -125,10 +126,10 @@ namespace Indexer.Indexes
             var hashCode = StringHelper.GetHashCode(term);
             if (!this.dictionary.ContainsKey(hashCode))
             {
-                this.dictionary.TryAdd(hashCode, new HashSet<StoredResult>());
+                this.dictionary.TryAdd(hashCode, new ConcurrentDictionary<StoredResult, byte>());
             }
 
-            this.dictionary[hashCode].Add(result);
+            this.dictionary[hashCode].TryAdd(result, default(byte));
         }
     }
 }
