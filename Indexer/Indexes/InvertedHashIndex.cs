@@ -38,9 +38,9 @@ namespace Indexer.Indexes
 
             if (count == 1)
             {
-                if (this.dictionary.TryGetValue(StringHelper.GetHashCode(tokens[0].Term), out var dictionary))
+                if (this.dictionary.TryGetValue(StringHelper.GetHashCode(tokens[0].Term), out var dict))
                 {
-                    return dictionary.Keys.ToList();
+                    return dict.Keys.ToList();
                 }
             }
             else

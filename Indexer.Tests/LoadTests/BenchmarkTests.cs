@@ -58,14 +58,16 @@ namespace Indexer.Tests.LoadTests
         {
             const int phrasesCount = 50;
             var phrases = new string[phrasesCount];
+            var tickCount = Environment.TickCount;
+            Console.WriteLine($"TickCount: {tickCount}");
             for (var i = 0; i < phrasesCount; i++)
             {
-                phrases[i] = TestDataGenerator.GetSearchPhrase(Environment.TickCount + i);
+                phrases[i] = TestDataGenerator.GetSearchPhrase(tickCount + i);
             }
 
             var tokenizer = new DefaultTokenizer();
             var stopWatch = new Stopwatch();
-            var lines = TestDataGenerator.GetRandomLines(Environment.TickCount, 20000);
+            var lines = TestDataGenerator.GetRandomLines(tickCount, 20000);
             var invertedIndex = new InvertedIndex(tokenizer);
             BuildIndex(invertedIndex, lines);
 

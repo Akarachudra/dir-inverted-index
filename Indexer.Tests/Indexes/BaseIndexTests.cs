@@ -86,7 +86,7 @@ namespace Indexer.Tests.Indexes
         }
 
         [Test]
-        public void Before_And_After_Spaces_Are_Ignored()
+        public void Start_And_End_Spaces_Are_Ignored()
         {
             const string word = "  test  ";
             var invertedIndex = this.GetNewIndex();
@@ -150,6 +150,25 @@ namespace Indexer.Tests.Indexes
             invertedIndex.Add(phrase, 0, null);
 
             invertedIndex.Find("some program notinterface").Should().BeEmpty();
+        }
+
+        [Test]
+        public void Can_Find_Several_Words_With_Single_Prefix()
+        {
+            const string firstWord = "someword";
+            const string secondWord = "someanotherword";
+            const string anotherDocumentWord = "someanotherdocumentword";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(secondWord, 0, "doc1");
+            invertedIndex.Add(firstWord, 1, "doc1");
+            invertedIndex.Add(anotherDocumentWord, 2, "doc2");
+
+            invertedIndex.Find("some")
+                         .Should()
+                         .BeEquivalentTo(
+                             new StoredResult { ColNumber = 1, Document = "doc1" },
+                             new StoredResult { ColNumber = 1, RowNumber = 1, Document = "doc1" },
+                             new StoredResult { ColNumber = 1, RowNumber = 2, Document = "doc2" });
         }
 
         [Test]

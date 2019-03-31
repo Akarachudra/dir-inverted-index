@@ -8,6 +8,7 @@ namespace Indexer.Tests.LoadTests
     {
         public static IList<StoredResult> Find(string[] lines, string phrase)
         {
+            phrase = phrase.Trim();
             var result = new List<StoredResult>();
             var rowNumber = 1;
 
