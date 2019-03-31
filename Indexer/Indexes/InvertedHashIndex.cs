@@ -65,29 +65,26 @@ namespace Indexer.Indexes
         {
             var resultList = new List<StoredResult>();
             var suffixesCount = tokens.Count;
-            var currentOffset = tokens[0].DistanceToNext;
-            for (var i = 0; i < sets[0].Count; i++)
+            foreach (var storedResult in sets[0])
             {
-                foreach (var storedResult in sets[0])
+                var currentOffset = tokens[0].DistanceToNext;
+                for (var j = 1; j < suffixesCount; j++)
                 {
-                    for (var j = 1; j < suffixesCount; j++)
+                    var expectedNextResult = new StoredResult
                     {
-                        var expectedNextResult = new StoredResult
-                        {
-                            Document = storedResult.Document,
-                            RowNumber = storedResult.RowNumber,
-                            ColNumber = storedResult.ColNumber + currentOffset
-                        };
-                        if (!sets[j].Contains(expectedNextResult))
-                        {
-                            break;
-                        }
+                        Document = storedResult.Document,
+                        RowNumber = storedResult.RowNumber,
+                        ColNumber = storedResult.ColNumber + currentOffset
+                    };
+                    if (!sets[j].Contains(expectedNextResult))
+                    {
+                        break;
+                    }
 
-                        currentOffset += tokens[j].DistanceToNext;
-                        if (j == suffixesCount - 1)
-                        {
-                            resultList.Add(storedResult);
-                        }
+                    currentOffset += tokens[j].DistanceToNext;
+                    if (j == suffixesCount - 1)
+                    {
+                        resultList.Add(storedResult);
                     }
                 }
             }

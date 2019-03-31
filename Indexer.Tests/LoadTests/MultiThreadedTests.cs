@@ -15,7 +15,7 @@ namespace Indexer.Tests.LoadTests
         public void Add_And_Read_Simultaneously()
         {
             var exceptionsCount = 0;
-            var index = new InvertedIndexWithLists(new DefaultTokenizer());
+            var index = new InvertedIndex(new DefaultTokenizer());
             Action addAction = () =>
             {
                 try

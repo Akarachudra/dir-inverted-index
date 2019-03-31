@@ -9,16 +9,21 @@ namespace Indexer.Indexes
     public class InvertedIndex : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;
-        private readonly SuffixArray<string, HashSet<StoredResult>> suffixArray;
+        private readonly SuffixArray<string, HashSet<StoredResult>> immutableSuffixArray;
+        private readonly SortedDictionary<string, HashSet<StoredResult>> memLogDictionary;
         private readonly IComparer<string> matchComparer;
         private readonly IComparer<string> prefixComparer;
+        private readonly object addLock;
 
         public InvertedIndex(ITokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
-            this.suffixArray = new SuffixArray<string, HashSet<StoredResult>>();
+            this.immutableSuffixArray = new SuffixArray<string, HashSet<StoredResult>>();
+            this.memLogDictionary = new SortedDictionary<string, HashSet<StoredResult>>();
             this.matchComparer = StringComparer.Ordinal;
             this.prefixComparer = new PrefixStringComparer();
+            this.addLock = new object();
+            var list = new List<string>();
         }
 
         public void Add(string line, int rowNumber, string document)
@@ -42,7 +47,7 @@ namespace Indexer.Indexes
 
             if (count == 1)
             {
-                if (this.suffixArray.TryGetValue(tokens[0].Term, out HashSet<StoredResult>[] sets, this.prefixComparer))
+                if (this.immutableSuffixArray.TryGetValue(tokens[0].Term, out HashSet<StoredResult>[] sets, this.prefixComparer))
                 {
                     return ConcatHashSetsToList(sets);
                 }
@@ -60,7 +65,7 @@ namespace Indexer.Indexes
                         comparer = this.prefixComparer;
                     }
 
-                    if (!this.suffixArray.TryGetValue(term, out sets[i], comparer))
+                    if (!this.immutableSuffixArray.TryGetValue(term, out sets[i], comparer))
                     {
                         return emptyResult;
                     }
@@ -87,11 +92,11 @@ namespace Indexer.Indexes
         {
             var resultList = new List<StoredResult>();
             var suffixesCount = tokens.Count;
-            var currentOffset = tokens[0].DistanceToNext;
             for (var i = 0; i < sets[0].Length; i++)
             {
                 foreach (var storedResult in sets[0][i])
                 {
+                    var currentOffset = tokens[0].DistanceToNext;
                     for (var j = 1; j < suffixesCount; j++)
                     {
                         var expectedNextResult = new StoredResult
@@ -134,13 +139,25 @@ namespace Indexer.Indexes
                 };
 
                 var suffix = term.Substring(i, length - i);
-                if (!this.suffixArray.TryGetValue(suffix, out HashSet<StoredResult> set, this.matchComparer))
+                lock (this.addLock)
                 {
-                    this.suffixArray.TryAdd(suffix, new HashSet<StoredResult> { storedResult }, this.matchComparer);
-                }
-                else
-                {
-                    set.Add(storedResult);
+                    if (!this.memLogDictionary.TryGetValue(suffix, out var hashSet))
+                    {
+                        this.immutableSuffixArray.TryAdd(suffix, new HashSet<StoredResult> { storedResult }, this.matchComparer);
+                    }
+                    else
+                    {
+                        hashSet.Add(storedResult);
+                    }
+
+                    if (!this.immutableSuffixArray.TryGetValue(suffix, out HashSet<StoredResult> set, this.matchComparer))
+                    {
+                        this.immutableSuffixArray.TryAdd(suffix, new HashSet<StoredResult> { storedResult }, this.matchComparer);
+                    }
+                    else
+                    {
+                        set.Add(storedResult);
+                    }
                 }
             }
         }

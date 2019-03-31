@@ -94,11 +94,11 @@ namespace Indexer.Indexes
         {
             var resultList = new List<StoredResult>();
             var suffixesCount = tokens.Count;
-            var currentOffset = tokens[0].DistanceToNext;
             for (var i = 0; i < lists[0].Length; i++)
             {
                 foreach (var storedResult in lists[0][i])
                 {
+                    var currentOffset = tokens[0].DistanceToNext;
                     for (var j = 1; j < suffixesCount; j++)
                     {
                         var expectedNextResult = new StoredResult

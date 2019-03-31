@@ -142,6 +142,16 @@ namespace Indexer.Tests.Base
         }
 
         [Test]
+        public void Last_Suffix_Is_Not_Ignored()
+        {
+            const string phrase = "some program interface";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(phrase, 0, null);
+
+            invertedIndex.Find("some program notinterface").Should().BeEmpty();
+        }
+
+        [Test]
         public void Index_Is_Case_Insensitive()
         {
             var invertedIndex = this.GetNewIndex();
