@@ -9,7 +9,7 @@ namespace Indexer.Tests.LoadTests
         {
             "program", "var", "const", "class", "interface", "Method", "int", "string", "static", "IList", "Dictionary",
             "Concurrent", "System", "using", "i", "namespace", "true", "false", "for", "ToString", "char", "return", "Get", "PROGRAM", "VAR", "CONST", "CLASS",
-            "INTERFACE", "FOR", "BREAK", "CONTINUE", "INTERF0CE", "Pr0gram", "us1ng"
+            "INTERFACE", "FOR", "BREAK", "CONTINUE", "INTERF0CE", "Pr0gram", "us1ng", " ", "  ", "++", ".", "!", "(", ")", "{", "}"
         };
 
         public static string[] GetRandomLines(int seed, int linesCount = 5000)
@@ -23,8 +23,7 @@ namespace Indexer.Tests.LoadTests
                 for (var j = 0; j < termsCount; j++)
                 {
                     var term = Terms[random.Next(Terms.Length)];
-                    var tail = Convert.ToBoolean(random.Next(0, 1)) ? " " : string.Empty;
-                    strBuilder.Append(term + tail);
+                    strBuilder.Append(term + " ");
                 }
 
                 lines[i] = strBuilder.ToString();
@@ -37,7 +36,7 @@ namespace Indexer.Tests.LoadTests
         public static string GetSearchPhrase(int seed)
         {
             var random = new Random(seed);
-            var termsCount = random.Next(1, 3);
+            var termsCount = random.Next(1, 4);
             var strBuilder = new StringBuilder();
             for (var j = 0; j < termsCount; j++)
             {

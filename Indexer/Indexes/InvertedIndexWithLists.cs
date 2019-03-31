@@ -10,8 +10,11 @@ namespace Indexer.Indexes
     {
         private readonly ITokenizer tokenizer;
         private readonly SuffixArray<string, LinkedList<StoredResult>> suffixArray;
+        // TODO: Use red-black -tree or something else
+        private readonly SuffixArray<string, LinkedList<StoredResult>> memLog;
         private readonly IComparer<string> matchComparer;
         private readonly IComparer<string> prefixComparer;
+        private readonly object addLock;
 
         public InvertedIndexWithLists(ITokenizer tokenizer)
         {
@@ -19,6 +22,7 @@ namespace Indexer.Indexes
             this.suffixArray = new SuffixArray<string, LinkedList<StoredResult>>();
             this.matchComparer = StringComparer.Ordinal;
             this.prefixComparer = new PrefixStringComparer();
+            this.addLock = new object();
         }
 
         public void Add(string line, int rowNumber, string document)
@@ -75,25 +79,25 @@ namespace Indexer.Indexes
             return emptyResult;
         }
 
-        private static IList<StoredResult> ConcatsLinkedLists(LinkedList<StoredResult>[] sets)
+        private static IList<StoredResult> ConcatsLinkedLists(LinkedList<StoredResult>[] lists)
         {
-            IEnumerable<StoredResult> concated = sets[0];
-            for (var i = 1; i < sets.Length; i++)
+            IEnumerable<StoredResult> concated = lists[0];
+            for (var i = 1; i < lists.Length; i++)
             {
-                concated = concated.Concat(sets[i]);
+                concated = concated.Concat(lists[i]);
             }
 
             return concated.ToList();
         }
 
-        private static IList<StoredResult> GetPhraseMatches(IList<Token> tokens, LinkedList<StoredResult>[][] sets)
+        private static IList<StoredResult> GetPhraseMatches(IList<Token> tokens, LinkedList<StoredResult>[][] lists)
         {
             var resultList = new List<StoredResult>();
             var suffixesCount = tokens.Count;
             var currentOffset = tokens[0].DistanceToNext;
-            for (var i = 0; i < sets[0].Length; i++)
+            for (var i = 0; i < lists[0].Length; i++)
             {
-                foreach (var storedResult in sets[0][i])
+                foreach (var storedResult in lists[0][i])
                 {
                     for (var j = 1; j < suffixesCount; j++)
                     {
@@ -104,7 +108,7 @@ namespace Indexer.Indexes
                             ColNumber = storedResult.ColNumber + currentOffset
                         };
 
-                        var containsPhrase = sets[j].Aggregate(false, (current, set) => current | set.Contains(expectedNextResult));
+                        var containsPhrase = lists[j].Aggregate(false, (current, set) => current | set.Contains(expectedNextResult));
                         if (!containsPhrase)
                         {
                             break;
@@ -137,13 +141,16 @@ namespace Indexer.Indexes
                 };
 
                 var suffix = term.Substring(i, length - i);
-                if (!this.suffixArray.TryGetValue(suffix, out LinkedList<StoredResult> list, this.matchComparer))
+                lock (this.addLock)
                 {
-                    this.suffixArray.TryAdd(suffix, new LinkedList<StoredResult>(new[] { storedResult }), this.matchComparer);
-                }
-                else
-                {
-                    this.AppendToList(list, storedResult);
+                    if (!this.suffixArray.TryGetValue(suffix, out LinkedList<StoredResult> list, this.matchComparer))
+                    {
+                        this.suffixArray.TryAdd(suffix, new LinkedList<StoredResult>(new[] { storedResult }), this.matchComparer);
+                    }
+                    else
+                    {
+                        this.AppendToList(list, storedResult);
+                    }
                 }
             }
         }
