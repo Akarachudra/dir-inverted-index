@@ -2,7 +2,7 @@
 
 namespace Indexer.Indexes
 {
-    public class StoredResult
+    public struct StoredResult
     {
         public string Document { get; set; }
 
