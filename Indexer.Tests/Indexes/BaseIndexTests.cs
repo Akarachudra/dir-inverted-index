@@ -172,6 +172,24 @@ namespace Indexer.Tests.Indexes
         }
 
         [Test]
+        public void Same_Phrase_With_Same_Row_In_Different_Documents()
+        {
+            const string firstPhrase = "some program";
+            const string secondPhrase = "zzzz program";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(firstPhrase, 0, "doc1");
+            invertedIndex.Add(secondPhrase, 2, "doc1");
+            invertedIndex.Add(firstPhrase, 0, "doc2");
+            invertedIndex.Add(secondPhrase, 1, "doc2");
+
+            invertedIndex.Find("some program")
+                         .Should()
+                         .BeEquivalentTo(
+                             new StoredResult { ColNumber = 1, Document = "doc1" },
+                             new StoredResult { ColNumber = 1, Document = "doc2" });
+        }
+
+        [Test]
         public void Index_Is_Case_Insensitive()
         {
             var invertedIndex = this.GetNewIndex();

@@ -25,15 +25,30 @@ namespace Indexer.Tests.Tokens
         [Test]
         public void Get_Tokens_With_Additional_Spaces()
         {
-            const string s = "  et  !.   as ";
+            const string s = "  et  !   as ";
             var tokenizer = new DefaultTokenizer();
 
             var tokens = tokenizer.GetTokens(s);
 
             tokens.Count.Should().Be(3);
             tokens[0].Should().BeEquivalentTo(new Token { Term = "et", Position = 3, DistanceToNext = 4 });
-            tokens[1].Should().BeEquivalentTo(new Token { Term = "!.", Position = 7, DistanceToNext = 5 });
-            tokens[2].Should().BeEquivalentTo(new Token { Term = "as", Position = 12, DistanceToNext = 0 });
+            tokens[1].Should().BeEquivalentTo(new Token { Term = "!", Position = 7, DistanceToNext = 4 });
+            tokens[2].Should().BeEquivalentTo(new Token { Term = "as", Position = 11, DistanceToNext = 0 });
+        }
+
+        [Test]
+        public void Get_Tokens_With_Dots_And_Brackets()
+        {
+            const string s = ". m.Get(new);  ";
+            var tokenizer = new DefaultTokenizer();
+
+            var tokens = tokenizer.GetTokens(s);
+
+            tokens.Count.Should().Be(4);
+            tokens[0].Should().BeEquivalentTo(new Token { Term = ".", Position = 1, DistanceToNext = 2 });
+            tokens[1].Should().BeEquivalentTo(new Token { Term = "m", Position = 3, DistanceToNext = 1 });
+            tokens[2].Should().BeEquivalentTo(new Token { Term = ".get", Position = 4, DistanceToNext = 4 });
+            tokens[3].Should().BeEquivalentTo(new Token { Term = "(new);", Position = 8, DistanceToNext = 0 });
         }
 
         [Test]

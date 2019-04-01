@@ -5,6 +5,8 @@ namespace Indexer.Tokens
 {
     public class DefaultTokenizer : ITokenizer
     {
+        private static readonly List<char> NewTermChars = new List<char> { ' ', '.', '(' };
+
         public IList<Token> GetTokens(string s)
         {
             var tokens = new List<Token>();
@@ -20,7 +22,7 @@ namespace Indexer.Tokens
             for (var i = 0; i < s.Length; i++)
             {
                 var c = char.ToLowerInvariant(s[i]);
-                if (c == ' ' && !previousIsSpace)
+                if (NewTermChars.Contains(c) && !previousIsSpace)
                 {
                     var position = termIndex + 1;
                     previousToken.DistanceToNext = position - previousToken.Position;
@@ -28,6 +30,7 @@ namespace Indexer.Tokens
                     tokens.Add(token);
                     previousToken = token;
                     term.Clear();
+                    termIndex = i;
                 }
 
                 if (c == ' ')

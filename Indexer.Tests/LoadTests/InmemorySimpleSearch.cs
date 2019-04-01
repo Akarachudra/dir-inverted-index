@@ -10,6 +10,11 @@ namespace Indexer.Tests.LoadTests
         {
             phrase = phrase.Trim();
             var result = new List<StoredResult>();
+            if (string.IsNullOrEmpty(phrase))
+            {
+                return result;
+            }
+
             var rowNumber = 1;
 
             foreach (var line in lines)
