@@ -60,11 +60,15 @@ namespace Indexer.Tests.LoadTests
                     throw;
                 }
             };
-            var readTask = new Task(readAction);
-            readTask.Start();
+            var readTasks = new Task[2];
+            for (var i = 0; i < readTasks.Length; i++)
+            {
+                readTasks[i] = new Task(readAction);
+                readTasks[i].Start();
+            }
 
             Task.WaitAll(addTasks);
-            Task.WaitAll(readTask);
+            Task.WaitAll(readTasks);
 
             exceptionsCount.Should().Be(0);
         }
