@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using Indexer.Helpers;
 
 namespace Indexer.Watch
 {
-    public class DirectoryObserver : IDirectoryObserver
+    public class DirectoryObserver : IDirectoryObserver, IDisposable
     {
         private readonly string path;
         private readonly Func<string, bool> isSuitableFile;
         private readonly FileSystemWatcher watcher;
+        private readonly ConcurrentDictionary<string, DateTime> lastChangesDictionary;
 
         public DirectoryObserver(string path, Func<string, bool> isSuitableFile)
         {
@@ -17,10 +19,12 @@ namespace Indexer.Watch
                 throw new ArgumentException("Directory not exists");
             }
 
+            this.lastChangesDictionary = new ConcurrentDictionary<string, DateTime>();
             this.path = path;
             this.isSuitableFile = isSuitableFile;
             this.watcher = new FileSystemWatcher(path);
             this.watcher.Changed += this.WatcherOnChanged;
+            this.watcher.Created += this.WatcherOnCreated;
         }
 
         public event FileSystemEventHandler Changed;
@@ -33,15 +37,12 @@ namespace Indexer.Watch
 
         public void Start()
         {
+            this.watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
+            this.watcher.EnableRaisingEvents = true;
             var fileInfos = FileHelper.GetAllFiles(this.path);
             foreach (var fileInfo in fileInfos)
             {
-                if (!this.isSuitableFile(fileInfo.FullName))
-                {
-                    continue;
-                }
-
-                this.OnCreated(new FileSystemEventArgs(WatcherChangeTypes.Created, fileInfo.DirectoryName, fileInfo.Name));
+                this.WatcherOnCreated(this.watcher, new FileSystemEventArgs(WatcherChangeTypes.Created, fileInfo.DirectoryName, fileInfo.Name));
             }
         }
 
@@ -72,7 +73,28 @@ namespace Indexer.Watch
 
         private void WatcherOnChanged(object sender, FileSystemEventArgs e)
         {
+            if (!this.isSuitableFile(e.FullPath))
+            {
+                return;
+            }
+
+            if (this.lastChangesDictionary.ContainsKey(e.FullPath) && this.lastChangesDictionary[e.FullPath] <= DateTime.UtcNow.AddSeconds(1))
+            {
+                return;
+            }
+
+            this.lastChangesDictionary[e.FullPath] = DateTime.UtcNow;
             this.OnChanged(e);
+        }
+
+        private void WatcherOnCreated(object sender, FileSystemEventArgs e)
+        {
+            if (!this.isSuitableFile(e.FullPath))
+            {
+                return;
+            }
+
+            this.OnCreated(e);
         }
     }
 }

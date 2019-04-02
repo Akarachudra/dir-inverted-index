@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Indexer.Watch
 {
-    public interface IDirectoryObserver : IDisposable
+    public interface IDirectoryObserver
     {
         event FileSystemEventHandler Changed;
 

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using FluentAssertions;
 using Indexer.Tests.Base;
 using Indexer.Watch;
@@ -21,24 +23,26 @@ namespace Indexer.Tests.Watch
         }
 
         [Test]
-        public void Notify_Created_Event_For_Exists_Files()
+        public void Invoke_Created_Event_For_Exists_Files()
         {
             var changeType = WatcherChangeTypes.All;
             var callBackedName = string.Empty;
             var callBackedFullPath = string.Empty;
             var callCount = 0;
             File.WriteAllText(this.FirstFilePath, "text");
-            var observer = new DirectoryObserver(this.PathToFiles, s => true);
-            FileSystemEventHandler callBackHandler = (sender, args) =>
+            using (var observer = new DirectoryObserver(this.PathToFiles, s => true))
             {
-                callBackedFullPath = args.FullPath;
-                callBackedName = args.Name;
-                changeType = args.ChangeType;
-                callCount++;
-            };
+                FileSystemEventHandler callBackHandler = (sender, args) =>
+                {
+                    callBackedFullPath = args.FullPath;
+                    callBackedName = args.Name;
+                    changeType = args.ChangeType;
+                    callCount++;
+                };
 
-            observer.Created += callBackHandler;
-            observer.Start();
+                observer.Created += callBackHandler;
+                observer.Start();
+            }
 
             callCount.Should().Be(1);
             callBackedName.Should().Be(FirstFileName);
@@ -47,16 +51,97 @@ namespace Indexer.Tests.Watch
         }
 
         [Test]
-        public void Do_Not_Notify_Created_Event_For_Unsuitable_Files()
+        public void Do_Not_Invoke_Exists_Files_Created_Event_For_Unsuitable_Files()
         {
             var callCount = 0;
             File.WriteAllText(this.FirstFilePath, "text");
-            var observer = new DirectoryObserver(this.PathToFiles, s => false);
-            FileSystemEventHandler callBackHandler = (sender, args) => { callCount++; };
+            using (var observer = new DirectoryObserver(this.PathToFiles, s => false))
+            {
+                FileSystemEventHandler callBackHandler = (sender, args) => { callCount++; };
 
-            observer.Created += callBackHandler;
-            observer.Start();
+                observer.Created += callBackHandler;
+                observer.Start();
+            }
 
+            callCount.Should().Be(0);
+        }
+
+        [Test]
+        public void Invoke_Created_Event_For_New_File()
+        {
+            var callCount = 0;
+            using (var observer = new DirectoryObserver(this.PathToFiles, s => true))
+            {
+                FileSystemEventHandler callBackHandler = (sender, args) => { callCount++; };
+
+                observer.Created += callBackHandler;
+                callCount.Should().Be(0);
+                observer.Start();
+                File.WriteAllText(this.FirstFilePath, "text");
+            }
+
+            Thread.Sleep(1000);
+            callCount.Should().Be(1);
+        }
+
+        [Test]
+        public void Do_Not_Invoke_Created_Event_For_Unsuitable_Files()
+        {
+            var callCount = 0;
+            using (var observer = new DirectoryObserver(this.PathToFiles, s => false))
+            {
+                FileSystemEventHandler callBackHandler = (sender, args) => { callCount++; };
+
+                observer.Created += callBackHandler;
+                callCount.Should().Be(0);
+                observer.Start();
+                File.WriteAllText(this.FirstFilePath, "text");
+            }
+
+            Thread.Sleep(1000);
+            callCount.Should().Be(0);
+        }
+
+        [Test]
+        public void Invoke_Changed_Event_For_Changed_File()
+        {
+            var callCount = 0;
+            File.WriteAllText(this.FirstFilePath, "text");
+            var e = new List<FileSystemEventArgs>();
+            using (var observer = new DirectoryObserver(this.PathToFiles, s => true))
+            {
+                FileSystemEventHandler callBackHandler = (sender, args) =>
+                {
+                    callCount++;
+                    e.Add(args);
+                };
+
+                observer.Changed += callBackHandler;
+                callCount.Should().Be(0);
+                observer.Start();
+                File.WriteAllText(this.FirstFilePath, "new text");
+            }
+
+            Thread.Sleep(1000);
+            callCount.Should().Be(1);
+        }
+
+        [Test]
+        public void Do_Not_Invoke_Changed_Event_For_Unsuitable_Files()
+        {
+            var callCount = 0;
+            File.WriteAllText(this.FirstFilePath, "text");
+            using (var observer = new DirectoryObserver(this.PathToFiles, s => false))
+            {
+                FileSystemEventHandler callBackHandler = (sender, args) => { callCount++; };
+
+                observer.Changed += callBackHandler;
+                callCount.Should().Be(0);
+                observer.Start();
+                File.WriteAllText(this.FirstFilePath, "new text");
+            }
+
+            Thread.Sleep(1000);
             callCount.Should().Be(0);
         }
     }
