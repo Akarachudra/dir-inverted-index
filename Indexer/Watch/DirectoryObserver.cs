@@ -9,11 +9,11 @@ namespace Indexer.Watch
     public class DirectoryObserver : IDirectoryObserver
     {
         private readonly string path;
-        private readonly Func<string, bool> isSuitableFile;
+        private readonly Func<string, bool> filterByPath;
         private readonly FileSystemWatcher watcher;
         private readonly ConcurrentDictionary<string, DateTime> lastChangesDictionary;
 
-        public DirectoryObserver(string path, Func<string, bool> isSuitableFile)
+        public DirectoryObserver(string path, Func<string, bool> filterByPath)
         {
             if (!Directory.Exists(path))
             {
@@ -22,7 +22,7 @@ namespace Indexer.Watch
 
             this.lastChangesDictionary = new ConcurrentDictionary<string, DateTime>();
             this.path = path;
-            this.isSuitableFile = isSuitableFile;
+            this.filterByPath = filterByPath;
             this.watcher = new FileSystemWatcher(path);
             this.watcher.Changed += this.WatcherOnChanged;
             this.watcher.Created += this.WatcherOnCreated;
@@ -74,7 +74,7 @@ namespace Indexer.Watch
 
         private void WatcherOnChanged(object sender, FileSystemEventArgs e)
         {
-            if (!this.isSuitableFile(e.FullPath))
+            if (!this.filterByPath(e.FullPath))
             {
                 return;
             }
@@ -95,7 +95,7 @@ namespace Indexer.Watch
                 return;
             }
 
-            if (!this.isSuitableFile(e.FullPath))
+            if (!this.filterByPath(e.FullPath))
             {
                 return;
             }
