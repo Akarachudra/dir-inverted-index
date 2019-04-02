@@ -5,7 +5,8 @@ using Indexer.Helpers;
 
 namespace Indexer.Watch
 {
-    public class DirectoryObserver : IDirectoryObserver, IDisposable
+    // TODO: impl deleted, renamed events
+    public class DirectoryObserver : IDirectoryObserver
     {
         private readonly string path;
         private readonly Func<string, bool> isSuitableFile;

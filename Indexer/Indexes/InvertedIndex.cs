@@ -6,6 +6,7 @@ using Indexer.Tokens;
 
 namespace Indexer.Indexes
 {
+    // TODO: impl change, rename, delete document
     public class InvertedIndex : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;

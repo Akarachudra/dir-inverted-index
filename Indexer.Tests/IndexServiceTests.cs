@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 using FluentAssertions;
 using Indexer.Indexes;
 using Indexer.Tests.Base;
@@ -59,6 +61,71 @@ namespace Indexer.Tests
             var result = indexService.Find("query phrase");
 
             result.Should().BeEquivalentTo(expectedResult);
+        }
+
+        [Test]
+        public void Start_Directory_Observer_At_Ctor()
+        {
+            var indexMock = new Mock<IInvertedIndex>();
+            var localObserverMock = new Mock<IDirectoryObserver>();
+
+            new IndexService(this.PathToFiles, indexMock.Object, localObserverMock.Object);
+
+            localObserverMock.Verify(x => x.Start(), Times.Once);
+        }
+
+        [Test]
+        public void Could_Not_Start_Two_Times()
+        {
+            var indexMock = new Mock<IInvertedIndex>();
+            var indexService = new IndexService(this.PathToFiles, indexMock.Object, this.observerMock.Object);
+
+            Action startAction = () => indexService.StartBuildIndex();
+
+            startAction.Should().NotThrow();
+            startAction.Should().Throw<ArgumentException>().And.Message.Should().Be("Already started");
+        }
+
+        [Test]
+        public void Can_Restart()
+        {
+            var indexMock = new Mock<IInvertedIndex>();
+            var indexService = new IndexService(this.PathToFiles, indexMock.Object, this.observerMock.Object);
+
+            indexService.StartBuildIndex();
+            indexService.StopBuildIndex();
+            indexService.StartBuildIndex();
+        }
+
+        [Test]
+        public void File_Is_Indexed_On_Created_Event()
+        {
+            var indexMock = new Mock<IInvertedIndex>();
+            var indexService = new IndexService(this.PathToFiles, indexMock.Object, this.observerMock.Object);
+            File.WriteAllLines(this.FirstFilePath, new[] { "first line", "second line" });
+
+            indexService.StartBuildIndex();
+            this.observerMock.Raise(mock => mock.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.PathToFiles, FirstFileName));
+
+            Thread.Sleep(1000);
+            indexMock.Verify(x => x.Add("first line", 1, this.FirstFilePath), Times.Once);
+            indexMock.Verify(x => x.Add("second line", 2, this.FirstFilePath), Times.Once);
+        }
+
+        [Test]
+        public void Can_Stop_Index_Building()
+        {
+            var indexMock = new Mock<IInvertedIndex>();
+            var indexService = new IndexService(this.PathToFiles, indexMock.Object, this.observerMock.Object);
+            File.WriteAllLines(this.FirstFilePath, new[] { "first line", "second line" });
+
+            indexService.StartBuildIndex();
+            indexService.StopBuildIndex();
+            Thread.Sleep(1000);
+            this.observerMock.Raise(mock => mock.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.PathToFiles, FirstFileName));
+
+            Thread.Sleep(1000);
+            indexMock.VerifyNoOtherCalls();
         }
     }
 }
