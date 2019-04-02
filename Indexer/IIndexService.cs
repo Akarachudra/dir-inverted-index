@@ -9,6 +9,6 @@ namespace Indexer
 
         void StopBuildIndex();
 
-        IList<StoredResult> Find(string phrase);
+        IList<StoredResult> Find(string query);
     }
 }

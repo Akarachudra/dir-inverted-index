@@ -109,11 +109,11 @@ namespace Indexer.Tests.Collections
             suffixArray.TryAdd("zone", 4, stringComparer);
             suffixArray.TryAdd("z", 5, stringComparer);
 
-            suffixArray.TryGetValue("_", out value, prefixComparer).Should().BeTrue();
+            suffixArray.TryGetRangeValue("_", out value, prefixComparer).Should().BeTrue();
             value.Should().BeEquivalentTo(1, 2);
-            suffixArray.TryGetValue("z", out value, prefixComparer).Should().BeTrue();
+            suffixArray.TryGetRangeValue("z", out value, prefixComparer).Should().BeTrue();
             value.Should().BeEquivalentTo(4, 5);
-            suffixArray.TryGetValue("not_exists", out value, prefixComparer).Should().BeFalse();
+            suffixArray.TryGetRangeValue("not_exists", out value, prefixComparer).Should().BeFalse();
         }
     }
 }

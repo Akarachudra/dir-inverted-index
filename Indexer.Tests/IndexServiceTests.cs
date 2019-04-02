@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using Indexer.Indexes;
 using Indexer.Tests.Base;
@@ -45,6 +46,19 @@ namespace Indexer.Tests
             Action createAction = () => new IndexService(this.PathToFiles, new InvertedIndex(new DefaultTokenizer()), null);
 
             createAction.Should().Throw<ArgumentException>().And.Message.Should().Be("Directory observer should not be null");
+        }
+
+        [Test]
+        public void Find_Returns_Result_From_Index()
+        {
+            var indexMock = new Mock<IInvertedIndex>();
+            var expectedResult = new List<StoredResult> { new StoredResult { RowNumber = 5 } };
+            indexMock.Setup(x => x.Find("query phrase")).Returns(expectedResult);
+            var indexService = new IndexService(this.PathToFiles, indexMock.Object, this.observerMock.Object);
+
+            var result = indexService.Find("query phrase");
+
+            result.Should().BeEquivalentTo(expectedResult);
         }
     }
 }

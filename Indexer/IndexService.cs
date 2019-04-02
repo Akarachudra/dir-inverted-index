@@ -41,9 +41,9 @@ namespace Indexer
             throw new System.NotImplementedException();
         }
 
-        public IList<StoredResult> Find(string phrase)
+        public IList<StoredResult> Find(string query)
         {
-            throw new System.NotImplementedException();
+            return this.index.Find(query);
         }
 
         private void ConsumeAction()

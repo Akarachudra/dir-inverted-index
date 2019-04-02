@@ -87,7 +87,7 @@ namespace Indexer.Collections
 
         public int Count => this.size;
 
-        public bool TryGetValue(TKey key, out TValue[] value, IComparer<TKey> comparer)
+        public bool TryGetRangeValue(TKey key, out TValue[] value, IComparer<TKey> comparer)
         {
             var leftIndex = this.LeftBinarySearch(key, comparer);
             var rightIndex = this.RightBinarySearch(key, comparer);

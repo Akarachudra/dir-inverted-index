@@ -49,7 +49,7 @@ namespace Indexer.Indexes
 
             if (count == 1)
             {
-                if (this.suffixArray.TryGetValue(tokens[0].Term, out LinkedList<StoredResult>[] lists, this.prefixComparer))
+                if (this.suffixArray.TryGetRangeValue(tokens[0].Term, out LinkedList<StoredResult>[] lists, this.prefixComparer))
                 {
                     return ConcatsLinkedLists(lists);
                 }
@@ -67,7 +67,7 @@ namespace Indexer.Indexes
                         comparer = this.prefixComparer;
                     }
 
-                    if (!this.suffixArray.TryGetValue(term, out lists[i], comparer))
+                    if (!this.suffixArray.TryGetRangeValue(term, out lists[i], comparer))
                     {
                         return emptyResult;
                     }

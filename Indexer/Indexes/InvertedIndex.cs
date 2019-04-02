@@ -45,7 +45,7 @@ namespace Indexer.Indexes
 
             if (count == 1)
             {
-                if (this.suffixArray.TryGetValue(tokens[0].Term, out HashSet<StoredResult>[] sets, this.prefixComparer))
+                if (this.suffixArray.TryGetRangeValue(tokens[0].Term, out HashSet<StoredResult>[] sets, this.prefixComparer))
                 {
                     return this.ConcatHashSetsToList(sets);
                 }
@@ -63,7 +63,7 @@ namespace Indexer.Indexes
                         comparer = this.prefixComparer;
                     }
 
-                    if (!this.suffixArray.TryGetValue(term, out sets[i], comparer))
+                    if (!this.suffixArray.TryGetRangeValue(term, out sets[i], comparer))
                     {
                         return emptyResult;
                     }
