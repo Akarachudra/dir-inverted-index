@@ -2,7 +2,7 @@
 
 namespace Indexer.Indexes
 {
-    public struct StoredResult
+    public struct DocumentPosition
     {
         public string Document { get; set; }
 
@@ -12,7 +12,7 @@ namespace Indexer.Indexes
 
         public override bool Equals(object obj)
         {
-            return obj is StoredResult result &&
+            return obj is DocumentPosition result &&
                    this.Document == result.Document &&
                    this.RowNumber == result.RowNumber &&
                    this.ColNumber == result.ColNumber;

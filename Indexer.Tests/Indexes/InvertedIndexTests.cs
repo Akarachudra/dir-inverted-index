@@ -16,13 +16,13 @@ namespace Indexer.Tests.Indexes
             var invertedIndex = new InvertedIndex(new DefaultTokenizer());
             invertedIndex.Add(additionalPhrase, 0, null);
 
-            invertedIndex.Find("as").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 }, new StoredResult { ColNumber = 9 });
-            invertedIndex.Find("As.  ").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 });
-            invertedIndex.Find("rase   ").Should().BeEquivalentTo(new StoredResult { ColNumber = 8 });
-            invertedIndex.Find("  phrase   ").Should().BeEquivalentTo(new StoredResult { ColNumber = 6 });
-            invertedIndex.Find(" !").Should().BeEquivalentTo(new StoredResult { ColNumber = 15 });
-            invertedIndex.Find("!").Should().BeEquivalentTo(new StoredResult { ColNumber = 15 });
-            invertedIndex.Find("! ").Should().BeEquivalentTo(new StoredResult { ColNumber = 15 });
+            invertedIndex.Find("as").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 1 }, new DocumentPosition { ColNumber = 9 });
+            invertedIndex.Find("As.  ").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 1 });
+            invertedIndex.Find("rase   ").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 8 });
+            invertedIndex.Find("  phrase   ").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 6 });
+            invertedIndex.Find(" !").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 15 });
+            invertedIndex.Find("!").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 15 });
+            invertedIndex.Find("! ").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 15 });
         }
 
         protected override IInvertedIndex GetNewIndex()

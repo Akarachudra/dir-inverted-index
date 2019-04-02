@@ -9,13 +9,13 @@ using NUnit.Framework;
 namespace Indexer.Tests
 {
     [TestFixture]
-    public class SimpleSearcherTests : TestsBase
+    public class SimpleDirectorySearcherTests : TestsBase
     {
-        private readonly IDirectorySearcher simpleSearcher;
+        private readonly ISearcher simpleSearcher;
 
-        public SimpleSearcherTests()
+        public SimpleDirectorySearcherTests()
         {
-            this.simpleSearcher = new SimpleSearcher(this.PathToFiles);
+            this.simpleSearcher = new SimpleDirectorySearcher(this.PathToFiles);
         }
 
         [Test]
@@ -38,13 +38,13 @@ namespace Indexer.Tests
         {
             const string content = "simple line. line.";
             File.WriteAllLines(this.FirstFilePath, new[] { content });
-            var firstExpectedResult = new StoredResult
+            var firstExpectedResult = new DocumentPosition
             {
                 Document = this.FirstFilePath,
                 RowNumber = 1,
                 ColNumber = 8
             };
-            var secondExpectedResult = new StoredResult
+            var secondExpectedResult = new DocumentPosition
             {
                 Document = this.FirstFilePath,
                 RowNumber = 1,
@@ -78,13 +78,13 @@ namespace Indexer.Tests
             var secondFileContent = $"{Environment.NewLine}new line.";
             File.WriteAllLines(this.FirstFilePath, new[] { firstFileContent });
             File.WriteAllLines(this.SecondFilePath, new[] { secondFileContent });
-            var firstExpectedResult = new StoredResult
+            var firstExpectedResult = new DocumentPosition
             {
                 Document = this.FirstFilePath,
                 RowNumber = 1,
                 ColNumber = 7
             };
-            var secondExpectedResult = new StoredResult
+            var secondExpectedResult = new DocumentPosition
             {
                 Document = this.SecondFilePath,
                 RowNumber = 2,

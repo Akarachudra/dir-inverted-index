@@ -9,9 +9,9 @@ namespace Indexer.Indexes
     public class InvertedIndexOnLists : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;
-        private readonly SuffixArray<string, LinkedList<StoredResult>> suffixArray;
+        private readonly SuffixArray<string, LinkedList<DocumentPosition>> suffixArray;
         // TODO: Use red-black -tree or something else
-        private readonly SuffixArray<string, LinkedList<StoredResult>> memLog;
+        private readonly SuffixArray<string, LinkedList<DocumentPosition>> memLog;
         private readonly IComparer<string> matchComparer;
         private readonly IComparer<string> prefixComparer;
         private readonly object addLock;
@@ -19,7 +19,7 @@ namespace Indexer.Indexes
         public InvertedIndexOnLists(ITokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
-            this.suffixArray = new SuffixArray<string, LinkedList<StoredResult>>();
+            this.suffixArray = new SuffixArray<string, LinkedList<DocumentPosition>>();
             this.matchComparer = StringComparer.Ordinal;
             this.prefixComparer = new PrefixStringComparer();
             this.addLock = new object();
@@ -37,9 +37,9 @@ namespace Indexer.Indexes
             }
         }
 
-        public IList<StoredResult> Find(string query)
+        public IList<DocumentPosition> Find(string query)
         {
-            var emptyResult = new List<StoredResult>();
+            var emptyResult = new List<DocumentPosition>();
             var tokens = this.tokenizer.GetTokens(query);
             var count = tokens.Count;
             if (count == 0)
@@ -49,7 +49,7 @@ namespace Indexer.Indexes
 
             if (count == 1)
             {
-                if (this.suffixArray.TryGetRangeValue(tokens[0].Term, out LinkedList<StoredResult>[] lists, this.prefixComparer))
+                if (this.suffixArray.TryGetRangeValue(tokens[0].Term, out LinkedList<DocumentPosition>[] lists, this.prefixComparer))
                 {
                     return ConcatsLinkedLists(lists);
                 }
@@ -57,7 +57,7 @@ namespace Indexer.Indexes
             else
             {
                 var lastIndex = count - 1;
-                var lists = new LinkedList<StoredResult>[count][];
+                var lists = new LinkedList<DocumentPosition>[count][];
                 for (var i = 0; i < count; i++)
                 {
                     var term = tokens[i].Term;
@@ -79,9 +79,9 @@ namespace Indexer.Indexes
             return emptyResult;
         }
 
-        private static IList<StoredResult> ConcatsLinkedLists(LinkedList<StoredResult>[] lists)
+        private static IList<DocumentPosition> ConcatsLinkedLists(LinkedList<DocumentPosition>[] lists)
         {
-            IEnumerable<StoredResult> concated = lists[0];
+            IEnumerable<DocumentPosition> concated = lists[0];
             for (var i = 1; i < lists.Length; i++)
             {
                 concated = concated.Concat(lists[i]);
@@ -90,20 +90,20 @@ namespace Indexer.Indexes
             return concated.ToList();
         }
 
-        private static IList<StoredResult> GetPhraseMatches(IList<Token> tokens, LinkedList<StoredResult>[][] lists)
+        private static IList<DocumentPosition> GetPhraseMatches(IList<Token> tokens, LinkedList<DocumentPosition>[][] lists)
         {
-            var resultList = new List<StoredResult>();
+            var resultList = new List<DocumentPosition>();
             var suffixesCount = tokens.Count;
-            foreach (var storedResult in lists[0][0])
+            foreach (var documentPosition in lists[0][0])
             {
                 var currentOffset = tokens[0].DistanceToNext;
                 for (var j = 1; j < suffixesCount; j++)
                 {
-                    var expectedNextResult = new StoredResult
+                    var expectedNextResult = new DocumentPosition
                     {
-                        Document = storedResult.Document,
-                        RowNumber = storedResult.RowNumber,
-                        ColNumber = storedResult.ColNumber + currentOffset
+                        Document = documentPosition.Document,
+                        RowNumber = documentPosition.RowNumber,
+                        ColNumber = documentPosition.ColNumber + currentOffset
                     };
 
                     var containsPhrase = lists[j].Aggregate(false, (current, set) => current | set.Contains(expectedNextResult));
@@ -115,7 +115,7 @@ namespace Indexer.Indexes
                     currentOffset += tokens[j].DistanceToNext;
                     if (j == suffixesCount - 1)
                     {
-                        resultList.Add(storedResult);
+                        resultList.Add(documentPosition);
                     }
                 }
             }
@@ -130,7 +130,7 @@ namespace Indexer.Indexes
             var length = term.Length;
             for (var i = 0; i < term.Length; i++)
             {
-                var storedResult = new StoredResult
+                var documentPosition = new DocumentPosition
                 {
                     ColNumber = startColNumber + i,
                     Document = document,
@@ -140,19 +140,19 @@ namespace Indexer.Indexes
                 var suffix = term.Substring(i, length - i);
                 lock (this.addLock)
                 {
-                    if (!this.suffixArray.TryGetValue(suffix, out LinkedList<StoredResult> list, this.matchComparer))
+                    if (!this.suffixArray.TryGetValue(suffix, out LinkedList<DocumentPosition> list, this.matchComparer))
                     {
-                        this.suffixArray.TryAdd(suffix, new LinkedList<StoredResult>(new[] { storedResult }), this.matchComparer);
+                        this.suffixArray.TryAdd(suffix, new LinkedList<DocumentPosition>(new[] { documentPosition }), this.matchComparer);
                     }
                     else
                     {
-                        this.AppendToList(list, storedResult);
+                        this.AppendToList(list, documentPosition);
                     }
                 }
             }
         }
 
-        private void AppendToList(LinkedList<StoredResult> list, StoredResult result)
+        private void AppendToList(LinkedList<DocumentPosition> list, DocumentPosition result)
         {
             if (list.Count == 0)
             {

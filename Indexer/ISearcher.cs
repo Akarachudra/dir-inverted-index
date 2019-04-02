@@ -3,8 +3,8 @@ using Indexer.Indexes;
 
 namespace Indexer
 {
-    public interface IDirectorySearcher
+    public interface ISearcher
     {
-        IList<StoredResult> Find(string phrase);
+        IList<DocumentPosition> Find(string phrase);
     }
 }

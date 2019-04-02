@@ -41,7 +41,7 @@ namespace Indexer
             throw new System.NotImplementedException();
         }
 
-        public IList<StoredResult> Find(string query)
+        public IList<DocumentPosition> Find(string query)
         {
             return this.index.Find(query);
         }

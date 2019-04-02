@@ -9,7 +9,7 @@ namespace Indexer.Indexes
     public class InvertedIndex : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;
-        private readonly SuffixArray<string, HashSet<StoredResult>> suffixArray;
+        private readonly SuffixArray<string, HashSet<DocumentPosition>> suffixArray;
         // TODO: Implement memLog on red-black tree
         private readonly IComparer<string> matchComparer;
         private readonly IComparer<string> prefixComparer;
@@ -18,7 +18,7 @@ namespace Indexer.Indexes
         public InvertedIndex(ITokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
-            this.suffixArray = new SuffixArray<string, HashSet<StoredResult>>();
+            this.suffixArray = new SuffixArray<string, HashSet<DocumentPosition>>();
             this.matchComparer = StringComparer.Ordinal;
             this.prefixComparer = new PrefixStringComparer();
             this.syncObj = new object();
@@ -33,9 +33,9 @@ namespace Indexer.Indexes
             }
         }
 
-        public IList<StoredResult> Find(string query)
+        public IList<DocumentPosition> Find(string query)
         {
-            var emptyResult = new List<StoredResult>();
+            var emptyResult = new List<DocumentPosition>();
             var tokens = this.tokenizer.GetTokens(query);
             var count = tokens.Count;
             if (count == 0)
@@ -45,7 +45,7 @@ namespace Indexer.Indexes
 
             if (count == 1)
             {
-                if (this.suffixArray.TryGetRangeValue(tokens[0].Term, out HashSet<StoredResult>[] sets, this.prefixComparer))
+                if (this.suffixArray.TryGetRangeValue(tokens[0].Term, out HashSet<DocumentPosition>[] sets, this.prefixComparer))
                 {
                     return this.ConcatHashSetsToList(sets);
                 }
@@ -53,7 +53,7 @@ namespace Indexer.Indexes
             else
             {
                 var lastIndex = count - 1;
-                var sets = new HashSet<StoredResult>[count][];
+                var sets = new HashSet<DocumentPosition>[count][];
                 for (var i = 0; i < count; i++)
                 {
                     var term = tokens[i].Term;
@@ -75,16 +75,16 @@ namespace Indexer.Indexes
             return emptyResult;
         }
 
-        private IList<StoredResult> ConcatHashSetsToList(HashSet<StoredResult>[] sets)
+        private IList<DocumentPosition> ConcatHashSetsToList(HashSet<DocumentPosition>[] sets)
         {
-            var result = new List<StoredResult>();
+            var result = new List<DocumentPosition>();
             lock (this.syncObj)
             {
                 foreach (var set in sets)
                 {
-                    foreach (var storedResult in set)
+                    foreach (var documentPosition in set)
                     {
-                        result.Add(storedResult);
+                        result.Add(documentPosition);
                     }
                 }
             }
@@ -92,22 +92,22 @@ namespace Indexer.Indexes
             return result;
         }
 
-        private IList<StoredResult> GetPhraseMatches(IList<Token> tokens, HashSet<StoredResult>[][] sets)
+        private IList<DocumentPosition> GetPhraseMatches(IList<Token> tokens, HashSet<DocumentPosition>[][] sets)
         {
-            var resultList = new List<StoredResult>();
+            var resultList = new List<DocumentPosition>();
             var suffixesCount = tokens.Count;
             lock (this.syncObj)
             {
-                foreach (var storedResult in sets[0][0])
+                foreach (var documentPosition in sets[0][0])
                 {
                     var currentOffset = tokens[0].DistanceToNext;
                     for (var j = 1; j < suffixesCount; j++)
                     {
-                        var expectedNextResult = new StoredResult
+                        var expectedNextResult = new DocumentPosition
                         {
-                            Document = storedResult.Document,
-                            RowNumber = storedResult.RowNumber,
-                            ColNumber = storedResult.ColNumber + currentOffset
+                            Document = documentPosition.Document,
+                            RowNumber = documentPosition.RowNumber,
+                            ColNumber = documentPosition.ColNumber + currentOffset
                         };
 
                         var containsPhrase = sets[j].Aggregate(false, (current, set) => current | set.Contains(expectedNextResult));
@@ -119,7 +119,7 @@ namespace Indexer.Indexes
                         currentOffset += tokens[j].DistanceToNext;
                         if (j == suffixesCount - 1)
                         {
-                            resultList.Add(storedResult);
+                            resultList.Add(documentPosition);
                         }
                     }
                 }
@@ -135,7 +135,7 @@ namespace Indexer.Indexes
             var length = term.Length;
             for (var i = 0; i < term.Length; i++)
             {
-                var storedResult = new StoredResult
+                var documentPosition = new DocumentPosition
                 {
                     ColNumber = startColNumber + i,
                     Document = document,
@@ -145,13 +145,13 @@ namespace Indexer.Indexes
                 var suffix = term.Substring(i, length - i);
                 lock (this.syncObj)
                 {
-                    if (!this.suffixArray.TryGetValue(suffix, out HashSet<StoredResult> set, this.matchComparer))
+                    if (!this.suffixArray.TryGetValue(suffix, out HashSet<DocumentPosition> set, this.matchComparer))
                     {
-                        this.suffixArray.TryAdd(suffix, new HashSet<StoredResult> { storedResult }, this.matchComparer);
+                        this.suffixArray.TryAdd(suffix, new HashSet<DocumentPosition> { documentPosition }, this.matchComparer);
                     }
                     else
                     {
-                        set.Add(storedResult);
+                        set.Add(documentPosition);
                     }
                 }
             }

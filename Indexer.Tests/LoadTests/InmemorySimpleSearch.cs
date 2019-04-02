@@ -6,10 +6,10 @@ namespace Indexer.Tests.LoadTests
 {
     public static class InmemorySimpleSearch
     {
-        public static IList<StoredResult> Find(string[] lines, string phrase)
+        public static IList<DocumentPosition> Find(string[] lines, string phrase)
         {
             phrase = phrase.Trim();
-            var result = new List<StoredResult>();
+            var result = new List<DocumentPosition>();
             if (string.IsNullOrEmpty(phrase))
             {
                 return result;
@@ -22,7 +22,7 @@ namespace Indexer.Tests.LoadTests
                 foreach (var index in AllIndexesOf(line, phrase))
                 {
                     result.Add(
-                        new StoredResult
+                        new DocumentPosition
                         {
                             ColNumber = index + 1,
                             RowNumber = rowNumber

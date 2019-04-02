@@ -15,7 +15,7 @@ namespace Indexer.Tests.Indexes
             const string document = "doc";
             const string word = "te_st";
             var invertedIndex = this.GetNewIndex();
-            var searchResult = new StoredResult { RowNumber = 2, ColNumber = 1, Document = document };
+            var searchResult = new DocumentPosition { RowNumber = 2, ColNumber = 1, Document = document };
 
             invertedIndex.Add(word, 2, document);
 
@@ -36,7 +36,7 @@ namespace Indexer.Tests.Indexes
             const string document = "doc";
             const string word = "c";
             var invertedIndex = this.GetNewIndex();
-            var searchResult = new StoredResult { RowNumber = 2, ColNumber = 1, Document = document };
+            var searchResult = new DocumentPosition { RowNumber = 2, ColNumber = 1, Document = document };
 
             invertedIndex.Add(word, 2, document);
 
@@ -49,17 +49,17 @@ namespace Indexer.Tests.Indexes
             const string document = "doc";
             const string word = "te_st";
             var invertedIndex = this.GetNewIndex();
-            var searchResult = new StoredResult { RowNumber = 2, ColNumber = 1, Document = document };
+            var searchResult = new DocumentPosition { RowNumber = 2, ColNumber = 1, Document = document };
 
             invertedIndex.Add(word, 2, document);
 
             invertedIndex.Find("te_s").Should().BeEquivalentTo(searchResult);
             invertedIndex.Find("te_").Should().BeEquivalentTo(searchResult);
             invertedIndex.Find("te").Should().BeEquivalentTo(searchResult);
-            invertedIndex.Find("e_st").Should().BeEquivalentTo(new StoredResult { RowNumber = 2, ColNumber = 2, Document = document });
-            invertedIndex.Find("_st").Should().BeEquivalentTo(new StoredResult { RowNumber = 2, ColNumber = 3, Document = document });
-            invertedIndex.Find("st").Should().BeEquivalentTo(new StoredResult { RowNumber = 2, ColNumber = 4, Document = document });
-            invertedIndex.Find("t").Should().BeEquivalentTo(searchResult, new StoredResult { RowNumber = 2, ColNumber = 5, Document = document });
+            invertedIndex.Find("e_st").Should().BeEquivalentTo(new DocumentPosition { RowNumber = 2, ColNumber = 2, Document = document });
+            invertedIndex.Find("_st").Should().BeEquivalentTo(new DocumentPosition { RowNumber = 2, ColNumber = 3, Document = document });
+            invertedIndex.Find("st").Should().BeEquivalentTo(new DocumentPosition { RowNumber = 2, ColNumber = 4, Document = document });
+            invertedIndex.Find("t").Should().BeEquivalentTo(searchResult, new DocumentPosition { RowNumber = 2, ColNumber = 5, Document = document });
         }
 
         [Test]
@@ -69,9 +69,9 @@ namespace Indexer.Tests.Indexes
             var invertedIndex = this.GetNewIndex();
             invertedIndex.Add(simplePhrase, 0, null);
 
-            invertedIndex.Find("some phr.se").Should().BeEquivalentTo(new StoredResult { ColNumber = 1 });
-            invertedIndex.Find("ome phr").Should().BeEquivalentTo(new StoredResult { ColNumber = 2 });
-            invertedIndex.Find(".se !n cod").Should().BeEquivalentTo(new StoredResult { ColNumber = 9 });
+            invertedIndex.Find("some phr.se").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 1 });
+            invertedIndex.Find("ome phr").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 2 });
+            invertedIndex.Find(".se !n cod").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 9 });
         }
 
         [Test]
@@ -81,7 +81,7 @@ namespace Indexer.Tests.Indexes
             var invertedIndex = this.GetNewIndex();
             invertedIndex.Add(simplePhrase, 0, null);
 
-            invertedIndex.Find("ome   phra").Should().BeEquivalentTo(new StoredResult { ColNumber = 2 });
+            invertedIndex.Find("ome   phra").Should().BeEquivalentTo(new DocumentPosition { ColNumber = 2 });
             invertedIndex.Find("ome  phr").Should().BeEmpty();
         }
 
@@ -90,7 +90,7 @@ namespace Indexer.Tests.Indexes
         {
             const string word = "  test  ";
             var invertedIndex = this.GetNewIndex();
-            var expectedResults = new List<StoredResult> { new StoredResult { ColNumber = 3 }, new StoredResult { ColNumber = 6 } };
+            var expectedResults = new List<DocumentPosition> { new DocumentPosition { ColNumber = 3 }, new DocumentPosition { ColNumber = 6 } };
             invertedIndex.Add(word, 0, null);
 
             invertedIndex.Find("  t").Should().BeEquivalentTo(expectedResults);
@@ -137,9 +137,9 @@ namespace Indexer.Tests.Indexes
             invertedIndex.Find("some program int")
                          .Should()
                          .BeEquivalentTo(
-                             new StoredResult { ColNumber = 1, Document = firstPhrase },
-                             new StoredResult { ColNumber = 1, Document = secondPhrase },
-                             new StoredResult { ColNumber = 1, Document = thirdPhrase });
+                             new DocumentPosition { ColNumber = 1, Document = firstPhrase },
+                             new DocumentPosition { ColNumber = 1, Document = secondPhrase },
+                             new DocumentPosition { ColNumber = 1, Document = thirdPhrase });
         }
 
         [Test]
@@ -166,9 +166,9 @@ namespace Indexer.Tests.Indexes
             invertedIndex.Find("some")
                          .Should()
                          .BeEquivalentTo(
-                             new StoredResult { ColNumber = 1, Document = "doc1" },
-                             new StoredResult { ColNumber = 1, RowNumber = 1, Document = "doc1" },
-                             new StoredResult { ColNumber = 1, RowNumber = 2, Document = "doc2" });
+                             new DocumentPosition { ColNumber = 1, Document = "doc1" },
+                             new DocumentPosition { ColNumber = 1, RowNumber = 1, Document = "doc1" },
+                             new DocumentPosition { ColNumber = 1, RowNumber = 2, Document = "doc2" });
         }
 
         [Test]
@@ -185,15 +185,15 @@ namespace Indexer.Tests.Indexes
             invertedIndex.Find("some program")
                          .Should()
                          .BeEquivalentTo(
-                             new StoredResult { ColNumber = 1, Document = "doc1" },
-                             new StoredResult { ColNumber = 1, Document = "doc2" });
+                             new DocumentPosition { ColNumber = 1, Document = "doc1" },
+                             new DocumentPosition { ColNumber = 1, Document = "doc2" });
         }
 
         [Test]
         public void Index_Is_Case_Insensitive()
         {
             var invertedIndex = this.GetNewIndex();
-            var expectedResult = new StoredResult { RowNumber = 2, ColNumber = 1, Document = "path" };
+            var expectedResult = new DocumentPosition { RowNumber = 2, ColNumber = 1, Document = "path" };
 
             invertedIndex.Add("T_e_s_T", expectedResult.RowNumber, expectedResult.Document);
 

@@ -6,18 +6,18 @@ using Indexer.Indexes;
 
 namespace Indexer
 {
-    public class SimpleSearcher : IDirectorySearcher
+    public class SimpleDirectorySearcher : ISearcher
     {
         private readonly string filesPath;
 
-        public SimpleSearcher(string filesPath)
+        public SimpleDirectorySearcher(string filesPath)
         {
             this.filesPath = filesPath;
         }
 
-        public IList<StoredResult> Find(string phrase)
+        public IList<DocumentPosition> Find(string phrase)
         {
-            var result = new List<StoredResult>();
+            var result = new List<DocumentPosition>();
             var files = FileHelper.GetAllFiles(this.filesPath);
             foreach (var file in files)
             {
@@ -28,7 +28,7 @@ namespace Indexer
                     foreach (Match match in Regex.Matches(line, phrase, RegexOptions.IgnoreCase))
                     {
                         result.Add(
-                            new StoredResult
+                            new DocumentPosition
                             {
                                 Document = file.FullName,
                                 ColNumber = match.Index + 1,

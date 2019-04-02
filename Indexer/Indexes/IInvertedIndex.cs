@@ -6,6 +6,6 @@ namespace Indexer.Indexes
     {
         void Add(string line, int rowNumber, string document);
 
-        IList<StoredResult> Find(string query);
+        IList<DocumentPosition> Find(string query);
     }
 }

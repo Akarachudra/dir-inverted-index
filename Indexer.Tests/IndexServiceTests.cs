@@ -52,7 +52,7 @@ namespace Indexer.Tests
         public void Find_Returns_Result_From_Index()
         {
             var indexMock = new Mock<IInvertedIndex>();
-            var expectedResult = new List<StoredResult> { new StoredResult { RowNumber = 5 } };
+            var expectedResult = new List<DocumentPosition> { new DocumentPosition { RowNumber = 5 } };
             indexMock.Setup(x => x.Find("query phrase")).Returns(expectedResult);
             var indexService = new IndexService(this.PathToFiles, indexMock.Object, this.observerMock.Object);
 

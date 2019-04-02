@@ -1,14 +1,9 @@
-﻿using System.Collections.Generic;
-using Indexer.Indexes;
-
-namespace Indexer
+﻿namespace Indexer
 {
-    public interface IIndexService
+    public interface IIndexService : ISearcher
     {
         void StartBuildIndex();
 
         void StopBuildIndex();
-
-        IList<StoredResult> Find(string query);
     }
 }
