@@ -6,7 +6,7 @@ using Indexer.Tokens;
 
 namespace Indexer.Indexes
 {
-    public class InvertedIndexWithLists : IInvertedIndex
+    public class InvertedIndexOnLists : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;
         private readonly SuffixArray<string, LinkedList<StoredResult>> suffixArray;
@@ -16,7 +16,7 @@ namespace Indexer.Indexes
         private readonly IComparer<string> prefixComparer;
         private readonly object addLock;
 
-        public InvertedIndexWithLists(ITokenizer tokenizer)
+        public InvertedIndexOnLists(ITokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
             this.suffixArray = new SuffixArray<string, LinkedList<StoredResult>>();

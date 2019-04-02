@@ -10,6 +10,7 @@ namespace Indexer.Indexes
     {
         private readonly ITokenizer tokenizer;
         private readonly SuffixArray<string, HashSet<StoredResult>> suffixArray;
+        // TODO: Implement memLog on red-black tree
         private readonly IComparer<string> matchComparer;
         private readonly IComparer<string> prefixComparer;
         private readonly object syncObj;
@@ -46,7 +47,7 @@ namespace Indexer.Indexes
             {
                 if (this.suffixArray.TryGetValue(tokens[0].Term, out HashSet<StoredResult>[] sets, this.prefixComparer))
                 {
-                    return ConcatHashSetsToList(sets);
+                    return this.ConcatHashSetsToList(sets);
                 }
             }
             else
@@ -74,15 +75,21 @@ namespace Indexer.Indexes
             return emptyResult;
         }
 
-        private static IList<StoredResult> ConcatHashSetsToList(HashSet<StoredResult>[] sets)
+        private IList<StoredResult> ConcatHashSetsToList(HashSet<StoredResult>[] sets)
         {
-            IEnumerable<StoredResult> concated = sets[0];
-            for (var i = 1; i < sets.Length; i++)
+            var result = new List<StoredResult>();
+            lock (this.syncObj)
             {
-                concated = concated.Concat(sets[i]);
+                foreach (var set in sets)
+                {
+                    foreach (var storedResult in set)
+                    {
+                        result.Add(storedResult);
+                    }
+                }
             }
 
-            return concated.ToList();
+            return result;
         }
 
         private IList<StoredResult> GetPhraseMatches(IList<Token> tokens, HashSet<StoredResult>[][] sets)

@@ -14,10 +14,10 @@ namespace Indexer.Tests.LoadTests
         [Test]
         public void Indexes_Build_Time()
         {
-            const int buildTimes = 5;
+            const int buildTimes = 3;
             var stopWatch = new Stopwatch();
             var tokenizer = new DefaultTokenizer();
-            var lines = TestDataGenerator.GetRandomLines(50000);
+            var lines = TestDataGenerator.GetRandomLines(50000, 20000);
 
             stopWatch.Start();
             for (var i = 0; i < buildTimes; i++)
@@ -67,7 +67,7 @@ namespace Indexer.Tests.LoadTests
 
             var tokenizer = new DefaultTokenizer();
             var stopWatch = new Stopwatch();
-            var lines = TestDataGenerator.GetRandomLines(tickCount, 20000);
+            var lines = TestDataGenerator.GetRandomLines(tickCount, 50000);
             var invertedIndex = new InvertedIndex(tokenizer);
             BuildIndex(invertedIndex, lines);
 
