@@ -43,9 +43,11 @@ namespace Indexer.Tests.LoadTests
         public void Search_Result_Is_Same_For_InvertedIndex_And_SimpleSearching()
         {
             var tokenizer = new DefaultTokenizer();
-            var lines = TestDataGenerator.GetRandomLines(Environment.TickCount);
+            var ticks = Environment.TickCount;
+            Console.WriteLine($"Test ticks: {ticks}");
+            var lines = TestDataGenerator.GetRandomLines(ticks);
             var invertedIndex = new InvertedIndex(tokenizer);
-            var phrase = TestDataGenerator.GetSearchPhrase(Environment.TickCount);
+            var phrase = TestDataGenerator.GetSearchPhrase(ticks);
             BuildIndex(invertedIndex, lines);
 
             var inmemoryResult = InmemorySimpleSearch.Find(lines, phrase);

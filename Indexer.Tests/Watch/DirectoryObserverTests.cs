@@ -144,5 +144,52 @@ namespace Indexer.Tests.Watch
             Thread.Sleep(1000);
             callCount.Should().Be(0);
         }
+
+        [Test]
+        public void Invoke_Event_For_Files_In_Subdirectories()
+        {
+            var callCount = 0;
+            var e = new List<FileSystemEventArgs>();
+            using (var observer = new DirectoryObserver(this.PathToFiles, s => true))
+            {
+                FileSystemEventHandler callBackHandler = (sender, args) =>
+                {
+                    callCount++;
+                    e.Add(args);
+                };
+
+                observer.Created += callBackHandler;
+                observer.Start();
+                Thread.Sleep(1000);
+                EnsureErasedFolder(this.IncludedDirPath);
+                File.WriteAllText(this.IncludedFilePath, "text");
+            }
+
+            Thread.Sleep(1000);
+            foreach (var argse in e)
+            {
+                Console.WriteLine(argse.FullPath);
+            }
+
+            callCount.Should().Be(1);
+        }
+
+        [Test]
+        public void Ignore_Directory_Created_Event()
+        {
+            var callCount = 0;
+            using (var observer = new DirectoryObserver(this.PathToFiles, s => true))
+            {
+                FileSystemEventHandler callBackHandler = (sender, args) => { callCount++; };
+
+                observer.Created += callBackHandler;
+                observer.Start();
+                Thread.Sleep(1000);
+                Directory.CreateDirectory(this.IncludedDirPath);
+            }
+
+            Thread.Sleep(1000);
+            callCount.Should().Be(0);
+        }
     }
 }

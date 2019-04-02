@@ -38,6 +38,7 @@ namespace Indexer.Watch
 
         public void Start()
         {
+            this.watcher.IncludeSubdirectories = true;
             this.watcher.EnableRaisingEvents = true;
             var fileInfos = FileHelper.GetAllFiles(this.path);
             foreach (var fileInfo in fileInfos)
@@ -89,6 +90,11 @@ namespace Indexer.Watch
 
         private void WatcherOnCreated(object sender, FileSystemEventArgs e)
         {
+            if (Directory.Exists(e.FullPath))
+            {
+                return;
+            }
+
             if (!this.isSuitableFile(e.FullPath))
             {
                 return;

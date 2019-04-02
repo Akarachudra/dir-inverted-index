@@ -19,16 +19,11 @@ namespace Indexer
         private Task[] buildTasks;
         private CancellationTokenSource cts;
 
-        public IndexService(string path, IInvertedIndex index, IDirectoryObserver directoryObserver, int buildTasksCount = 2)
+        public IndexService(IInvertedIndex index, IDirectoryObserver directoryObserver, int buildTasksCount = 2)
         {
             if (buildTasksCount <= 0)
             {
                 throw new ArgumentException("Invalid index build tasks count");
-            }
-
-            if (!Directory.Exists(path))
-            {
-                throw new ArgumentException("Path doesn't exists");
             }
 
             this.index = index ?? throw new ArgumentException("Index should not be null");
