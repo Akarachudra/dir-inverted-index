@@ -1,8 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Indexer.Watch
 {
-    public interface IDirectoryObserver
+    public interface IDirectoryObserver : IDisposable
     {
         event FileSystemEventHandler Changed;
 
@@ -11,5 +12,7 @@ namespace Indexer.Watch
         event FileSystemEventHandler Deleted;
 
         event RenamedEventHandler Renamed;
+
+        void Start();
     }
 }

@@ -5,6 +5,13 @@ namespace Indexer.Tests.Base
 {
     public class TestsBase
     {
+        protected const string TestFilesFolder = "Test_Files";
+        protected const string FirstFileName = "FirstFileName.txt";
+        protected const string SecondFileName = "SecondFileName.txt";
+        protected const string IncludedFileName = "IncludedFileName.txt";
+        protected const string DeepIncludedFileName = "DeepIncludedFileName.txt";
+        protected const string IncludedDir = "IncludedDir";
+        protected const string DeepIncludedDir = "DeepIncludedDir";
         protected readonly string FirstFilePath;
         protected readonly string SecondFilePath;
         protected readonly string IncludedFilePath;
@@ -12,17 +19,10 @@ namespace Indexer.Tests.Base
         protected readonly string DeepIncludedDirPath;
         protected readonly string DeepIncludedFilePath;
         protected readonly string PathToFiles;
-        private const string TestFilesFolder = "Test_Data";
-        private const string FirstFileName = "FirstFileName.txt";
-        private const string SecondFileName = "SecondFileName.txt";
-        private const string IncludedFileName = "IncludedFileName.txt";
-        private const string DeepIncludedFileName = "DeepIncludedFileName.txt";
-        private const string IncludedDir = "IncludedDir";
-        private const string DeepIncludedDir = "DeepIncludedDir";
 
         public TestsBase()
         {
-            this.PathToFiles = GetPathToTemplates();
+            this.PathToFiles = GetPathToTestFiles();
             this.FirstFilePath = Path.Combine(this.PathToFiles, FirstFileName);
             this.SecondFilePath = Path.Combine(this.PathToFiles, SecondFileName);
             this.IncludedDirPath = Path.Combine(this.PathToFiles, IncludedDir);
@@ -37,7 +37,7 @@ namespace Indexer.Tests.Base
             EnsureErasedFolder(this.PathToFiles);
         }
 
-        protected static string GetPathToTemplates()
+        protected static string GetPathToTestFiles()
         {
             return Path.Combine(TestContext.CurrentContext.TestDirectory, TestFilesFolder);
         }

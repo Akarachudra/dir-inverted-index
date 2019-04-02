@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Indexer.Helpers;
 
 namespace Indexer.Watch
 {
@@ -29,6 +30,25 @@ namespace Indexer.Watch
         public event FileSystemEventHandler Deleted;
 
         public event RenamedEventHandler Renamed;
+
+        public void Start()
+        {
+            var fileInfos = FileHelper.GetAllFiles(this.path);
+            foreach (var fileInfo in fileInfos)
+            {
+                if (!this.isSuitableFile(fileInfo.FullName))
+                {
+                    continue;
+                }
+
+                this.OnCreated(new FileSystemEventArgs(WatcherChangeTypes.Created, fileInfo.DirectoryName, fileInfo.Name));
+            }
+        }
+
+        public void Dispose()
+        {
+            this.watcher.Dispose();
+        }
 
         protected virtual void OnChanged(FileSystemEventArgs e)
         {
