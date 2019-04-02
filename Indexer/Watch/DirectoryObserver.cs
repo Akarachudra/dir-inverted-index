@@ -37,7 +37,6 @@ namespace Indexer.Watch
 
         public void Start()
         {
-            this.watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
             this.watcher.EnableRaisingEvents = true;
             var fileInfos = FileHelper.GetAllFiles(this.path);
             foreach (var fileInfo in fileInfos)
