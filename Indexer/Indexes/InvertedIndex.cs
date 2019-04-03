@@ -101,12 +101,12 @@ namespace Indexer.Indexes
             return result;
         }
 
-        private IList<DocumentPosition> GetPhraseMatches(string phrase, IEnumerable<DocumentPosition> documentContent)
+        private IList<DocumentPosition> GetPhraseMatches(string phrase, IEnumerable<DocumentPosition> firstList)
         {
             var resultList = new List<DocumentPosition>();
             lock (this.syncObj)
             {
-                foreach (var documentPosition in documentContent)
+                foreach (var documentPosition in firstList)
                 {
                     var rowNumber = documentPosition.RowNumber - 1 < 0 ? 0 : documentPosition.RowNumber - 1;
                     var line = this.indexedFiles[documentPosition.Document][rowNumber];
