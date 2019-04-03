@@ -10,7 +10,8 @@ namespace Indexer.Indexes
     public class InvertedIndex : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;
-        private readonly SuffixArray<string, HashSet<DocumentPosition>> suffixArray;
+        private readonly SuffixArray<string, List<DocumentPosition>> suffixArray;
+        private readonly Dictionary<string, string[]> indexedFiles;
         // TODO: Implement memLog on red-black tree
         private readonly IComparer<string> matchComparer;
         private readonly IComparer<string> prefixComparer;
@@ -19,18 +20,42 @@ namespace Indexer.Indexes
         public InvertedIndex(ITokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
-            this.suffixArray = new SuffixArray<string, HashSet<DocumentPosition>>();
+            this.suffixArray = new SuffixArray<string, List<DocumentPosition>>();
             this.matchComparer = StringComparer.Ordinal;
             this.prefixComparer = new PrefixStringComparer();
             this.syncObj = new object();
+            this.indexedFiles = new Dictionary<string, string[]>();
         }
 
-        public void Add(string line, int rowNumber, string document)
+        public void Add(string[] lines, string document)
         {
-            var tokens = this.tokenizer.GetTokens(line);
-            foreach (var token in tokens)
+            if (string.IsNullOrWhiteSpace(document))
             {
-                this.AddToken(token, rowNumber, document);
+                throw new ArgumentException("Document could not be null or whitespace");
+            }
+
+            lock (this.syncObj)
+            {
+                if (!this.indexedFiles.ContainsKey(document))
+                {
+                    var loweredLines = new string[lines.Length];
+                    for (var i = 0; i < lines.Length; i++)
+                    {
+                        loweredLines[i] = lines[i].ToLowerInvariant();
+                    }
+
+                    this.indexedFiles[document] = loweredLines;
+                }
+            }
+
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var tokens = this.tokenizer.GetTokens(lines[i]);
+
+                foreach (var token in tokens)
+                {
+                    this.AddToken(token, i + 1, document);
+                }
             }
         }
 
@@ -46,82 +71,53 @@ namespace Indexer.Indexes
 
             if (count == 1)
             {
-                if (this.suffixArray.TryGetRangeValue(tokens[0].Term, out HashSet<DocumentPosition>[] sets, this.prefixComparer))
+                if (this.suffixArray.TryGetRangeValue(tokens[0].Term, out var lists, this.prefixComparer))
                 {
-                    return this.ConcatHashSetsToList(sets);
+                    return this.ConcatLists(lists);
                 }
             }
             else
             {
-                var lastIndex = count - 1;
-                var sets = new HashSet<DocumentPosition>[count][];
-                for (var i = 0; i < count; i++)
+                var term = tokens[0].Term;
+                if (!this.suffixArray.TryGetValue(term, out var firstList, this.matchComparer))
                 {
-                    var term = tokens[i].Term;
-                    var comparer = this.matchComparer;
-                    if (i == lastIndex)
-                    {
-                        comparer = this.prefixComparer;
-                    }
-
-                    if (!this.suffixArray.TryGetRangeValue(term, out sets[i], comparer))
-                    {
-                        return emptyResult;
-                    }
+                    return emptyResult;
                 }
 
-                return this.GetPhraseMatches(tokens, sets);
+                return this.GetPhraseMatches(query.ToLowerInvariant(), firstList);
             }
 
             return emptyResult;
         }
 
-        private IList<DocumentPosition> ConcatHashSetsToList(HashSet<DocumentPosition>[] sets)
+        private IList<DocumentPosition> ConcatLists(IEnumerable<List<DocumentPosition>> lists)
         {
             var result = new List<DocumentPosition>();
             lock (this.syncObj)
             {
-                foreach (var set in sets)
-                {
-                    foreach (var documentPosition in set)
-                    {
-                        result.Add(documentPosition);
-                    }
-                }
+                result.AddRange(lists.SelectMany(list => list));
             }
 
             return result;
         }
 
-        private IList<DocumentPosition> GetPhraseMatches(IList<Token> tokens, HashSet<DocumentPosition>[][] sets)
+        private IList<DocumentPosition> GetPhraseMatches(string phrase, IEnumerable<DocumentPosition> documentContent)
         {
             var resultList = new List<DocumentPosition>();
-            var suffixesCount = tokens.Count;
             lock (this.syncObj)
             {
-                foreach (var documentPosition in sets[0][0])
+                foreach (var documentPosition in documentContent)
                 {
-                    var currentOffset = tokens[0].DistanceToNext;
-                    for (var j = 1; j < suffixesCount; j++)
+                    var rowNumber = documentPosition.RowNumber - 1 < 0 ? 0 : documentPosition.RowNumber - 1;
+                    var line = this.indexedFiles[documentPosition.Document][rowNumber];
+                    if (line.Length < documentPosition.ColNumber - 1 + phrase.Length)
                     {
-                        var expectedNextResult = new DocumentPosition
-                        {
-                            Document = documentPosition.Document,
-                            RowNumber = documentPosition.RowNumber,
-                            ColNumber = documentPosition.ColNumber + currentOffset
-                        };
+                        continue;
+                    }
 
-                        var containsPhrase = sets[j].Aggregate(false, (current, set) => current | set.Contains(expectedNextResult));
-                        if (!containsPhrase)
-                        {
-                            break;
-                        }
-
-                        currentOffset += tokens[j].DistanceToNext;
-                        if (j == suffixesCount - 1)
-                        {
-                            resultList.Add(documentPosition);
-                        }
+                    if (line.Substring(documentPosition.ColNumber - 1, phrase.Length) == phrase)
+                    {
+                        resultList.Add(documentPosition);
                     }
                 }
             }
@@ -146,13 +142,13 @@ namespace Indexer.Indexes
                 var suffix = term.Substring(i, length - i);
                 lock (this.syncObj)
                 {
-                    if (!this.suffixArray.TryGetValue(suffix, out HashSet<DocumentPosition> set, this.matchComparer))
+                    if (!this.suffixArray.TryGetValue(suffix, out var list, this.matchComparer))
                     {
-                        this.suffixArray.TryAdd(suffix, new HashSet<DocumentPosition> { documentPosition }, this.matchComparer);
+                        this.suffixArray.TryAdd(suffix, new List<DocumentPosition> { documentPosition }, this.matchComparer);
                     }
                     else
                     {
-                        set.Add(documentPosition);
+                        list.Add(documentPosition);
                     }
                 }
             }

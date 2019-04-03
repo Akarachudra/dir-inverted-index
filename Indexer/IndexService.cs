@@ -81,12 +81,8 @@ namespace Indexer
                     try
                     {
                         var path = args.FullPath;
-                        var rowNumber = 1;
-                        foreach (var line in File.ReadLines(path))
-                        {
-                            this.index.Add(line, rowNumber, path);
-                            rowNumber++;
-                        }
+                        var lines = File.ReadAllLines(path);
+                        this.index.Add(lines, path);
                     }
                     catch (Exception e)
                     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using FluentAssertions;
 using Indexer.Indexes;
 using Indexer.Tests.Base;
@@ -52,7 +53,10 @@ namespace Indexer.Tests.LoadTests
 
             var inmemoryResult = InmemorySimpleSearch.Find(lines, phrase);
 
-            invertedIndex.Find(phrase).Should().BeEquivalentTo(inmemoryResult);
+            invertedIndex.Find(phrase)
+                         .Select(x => new { x.RowNumber, x.ColNumber })
+                         .Should()
+                         .BeEquivalentTo(inmemoryResult.Select(x => new { x.RowNumber, x.ColNumber }));
         }
 
         [Test]
@@ -76,7 +80,10 @@ namespace Indexer.Tests.LoadTests
             stopWatch.Start();
             for (var i = 0; i < phrasesCount; i++)
             {
+                var elapsedBefore = stopWatch.Elapsed;
                 invertedIndex.Find(phrases[i]);
+                var elapsed = stopWatch.Elapsed - elapsedBefore;
+                Console.WriteLine($"Elapsed for phrase: {phrases[i]} {elapsed}");
             }
 
             var indexSearchingTime = stopWatch.Elapsed;
@@ -96,10 +103,7 @@ namespace Indexer.Tests.LoadTests
 
         private static void BuildIndex(IInvertedIndex index, string[] lines)
         {
-            for (var i = 0; i < lines.Length; i++)
-            {
-                index.Add(lines[i], i + 1, null);
-            }
+            index.Add(lines, "doc");
         }
     }
 }

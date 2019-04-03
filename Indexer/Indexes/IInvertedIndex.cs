@@ -4,7 +4,7 @@ namespace Indexer.Indexes
 {
     public interface IInvertedIndex
     {
-        void Add(string line, int rowNumber, string document);
+        void Add(string[] lines, string document);
 
         IList<DocumentPosition> Find(string query);
     }

@@ -13,7 +13,7 @@ namespace Indexer.Tests.Indexes
         {
             var invertedIndex = this.GetNewIndex();
 
-            invertedIndex.Add("test", 0, null);
+            invertedIndex.Add(new[] { "test" }, "doc");
 
             invertedIndex.Find("es").Should().BeEmpty();
         }

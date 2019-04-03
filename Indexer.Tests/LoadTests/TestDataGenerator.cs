@@ -23,7 +23,8 @@ namespace Indexer.Tests.LoadTests
                 for (var j = 0; j < termsCount; j++)
                 {
                     var term = Terms[random.Next(Terms.Length)];
-                    strBuilder.Append(term + " ");
+                    var space = random.Next(0, 2) > 0 ? " " : string.Empty;
+                    strBuilder.Append(term + space);
                 }
 
                 lines[i] = strBuilder.ToString();

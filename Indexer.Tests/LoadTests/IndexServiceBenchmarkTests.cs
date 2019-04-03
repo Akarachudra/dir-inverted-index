@@ -26,10 +26,10 @@ namespace Indexer.Tests.LoadTests
         public void OneTimeSetup()
         {
             const int fromTicks = 200;
-            var firstFileLines = TestDataGenerator.GetRandomLines(fromTicks, 70000);
-            var secondFileLines = TestDataGenerator.GetRandomLines(fromTicks, 70000);
-            var includedFileLines = TestDataGenerator.GetRandomLines(fromTicks, 70000);
-            var deepIncludedFileLines = TestDataGenerator.GetRandomLines(fromTicks, 70000);
+            var firstFileLines = TestDataGenerator.GetRandomLines(fromTicks, 30000);
+            var secondFileLines = TestDataGenerator.GetRandomLines(fromTicks, 30000);
+            var includedFileLines = TestDataGenerator.GetRandomLines(fromTicks, 30000);
+            var deepIncludedFileLines = TestDataGenerator.GetRandomLines(fromTicks, 30000);
             EnsureErasedFolder(this.PathToFiles);
             EnsureErasedFolder(this.IncludedDirPath);
             EnsureErasedFolder(this.DeepIncludedDirPath);

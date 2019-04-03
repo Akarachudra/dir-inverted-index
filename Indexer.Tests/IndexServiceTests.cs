@@ -93,17 +93,27 @@ namespace Indexer.Tests
         [Test]
         public void File_Is_Indexed_On_Created_Event()
         {
+            var callBackedArray = new string[0];
+            var callBackedString = string.Empty;
             var indexMock = new Mock<IInvertedIndex>();
+            indexMock.Setup(x => x.Add(It.IsAny<string[]>(), It.IsAny<string>()))
+                     .Callback<string[], string>(
+                         (strings, s) =>
+                         {
+                             callBackedArray = strings;
+                             callBackedString = s;
+                         });
             var indexService = new IndexService(indexMock.Object, this.observerMock.Object);
-            File.WriteAllLines(this.FirstFilePath, new[] { "first line", "second line" });
+            var lines = new[] { "first line", "second line" };
+            File.WriteAllLines(this.FirstFilePath, lines);
 
             indexService.StartBuildIndex();
             Thread.Sleep(1500);
             this.observerMock.Raise(mock => mock.Created += null, new FileSystemEventArgs(WatcherChangeTypes.Created, this.PathToFiles, FirstFileName));
 
             Thread.Sleep(1500);
-            indexMock.Verify(x => x.Add("first line", 1, this.FirstFilePath), Times.Once);
-            indexMock.Verify(x => x.Add("second line", 2, this.FirstFilePath), Times.Once);
+            callBackedArray.Should().BeEquivalentTo(lines);
+            callBackedString.Should().BeEquivalentTo(this.FirstFilePath);
         }
 
         [Test]
