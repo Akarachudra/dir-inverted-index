@@ -1,5 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
+using System.Text;
 using FluentAssertions;
 using Indexer.Helpers;
 using Indexer.Tests.Base;
