@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -16,13 +17,14 @@ namespace Indexer.Tests.LoadTests
         {
             var exceptionsCount = 0;
             var index = this.GetNewIndex();
+            var ticks = 100;
             Action addAction = () =>
             {
                 try
                 {
-                    for (var i = 0; i < 10; i++)
+                    for (var i = 0; i < 20; i++)
                     {
-                        var lines = TestDataGenerator.GetRandomLines(Environment.TickCount + i, 1000);
+                        var lines = TestDataGenerator.GetRandomLines(ticks + i, 10000);
                         for (var j = 0; j < lines.Length; j++)
                         {
                             index.Add(lines[j], j + 1, "some doc");
@@ -36,6 +38,7 @@ namespace Indexer.Tests.LoadTests
                     throw;
                 }
             };
+            var stopWatch = Stopwatch.StartNew();
             var addTasks = new Task[2];
             for (var i = 0; i < addTasks.Length; i++)
             {
@@ -47,9 +50,9 @@ namespace Indexer.Tests.LoadTests
             {
                 try
                 {
-                    for (var i = 0; i < 1000; i++)
+                    for (var i = 0; i < 50000; i++)
                     {
-                        var phrase = TestDataGenerator.GetSearchPhrase(Environment.TickCount + i);
+                        var phrase = TestDataGenerator.GetSearchPhrase(ticks + i);
                         index.Find(phrase);
                     }
                 }
@@ -68,7 +71,9 @@ namespace Indexer.Tests.LoadTests
             }
 
             Task.WaitAll(addTasks);
+            Console.WriteLine($"Build elapsed: {stopWatch.Elapsed}");
             Task.WaitAll(readTasks);
+            Console.WriteLine($"Total elapsed: {stopWatch.Elapsed}");
 
             exceptionsCount.Should().Be(0);
         }

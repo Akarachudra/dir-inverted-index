@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Indexer.Helpers;
 using Indexer.Tokens;
@@ -9,12 +8,14 @@ namespace Indexer.Indexes
     public class InvertedHashIndex : IInvertedIndex
     {
         private readonly ITokenizer tokenizer;
-        private readonly ConcurrentDictionary<int, ConcurrentDictionary<DocumentPosition, byte>> dictionary;
+        private readonly Dictionary<int, HashSet<DocumentPosition>> dictionary;
+        private readonly object syncObj;
 
         public InvertedHashIndex(ITokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
-            this.dictionary = new ConcurrentDictionary<int, ConcurrentDictionary<DocumentPosition, byte>>();
+            this.dictionary = new Dictionary<int, HashSet<DocumentPosition>>();
+            this.syncObj = new object();
         }
 
         public void Add(string line, int rowNumber, string document)
@@ -38,54 +39,62 @@ namespace Indexer.Indexes
 
             if (count == 1)
             {
-                if (this.dictionary.TryGetValue(StringHelper.GetHashCode(tokens[0].Term), out var dict))
+                lock (this.syncObj)
                 {
-                    return dict.Keys.ToList();
+                    if (this.dictionary.TryGetValue(StringHelper.GetHashCode(tokens[0].Term), out var dict))
+                    {
+                        return dict.ToList();
+                    }
                 }
             }
             else
             {
-                var dictionaries = new ConcurrentDictionary<DocumentPosition, byte>[count];
+                var dictionaries = new HashSet<DocumentPosition>[count];
                 for (var i = 0; i < count; i++)
                 {
-                    var term = tokens[i].Term;
-                    if (!this.dictionary.TryGetValue(StringHelper.GetHashCode(term), out dictionaries[i]))
+                    lock (this.syncObj)
                     {
-                        return new List<DocumentPosition>();
+                        var term = tokens[i].Term;
+                        if (!this.dictionary.TryGetValue(StringHelper.GetHashCode(term), out dictionaries[i]))
+                        {
+                            return new List<DocumentPosition>();
+                        }
                     }
                 }
 
-                return GetPhraseMatches(tokens, dictionaries);
+                return this.GetPhraseMatches(tokens, dictionaries);
             }
 
             return new List<DocumentPosition>();
         }
 
-        private static IList<DocumentPosition> GetPhraseMatches(IList<Token> tokens, ConcurrentDictionary<DocumentPosition, byte>[] dictionaries)
+        private IList<DocumentPosition> GetPhraseMatches(IList<Token> tokens, HashSet<DocumentPosition>[] dictionaries)
         {
             var resultList = new List<DocumentPosition>();
             var suffixesCount = tokens.Count;
-            foreach (var e in dictionaries[0])
+            lock (this.syncObj)
             {
-                var currentPosition = e.Key;
-                var currentOffset = tokens[0].DistanceToNext;
-                for (var j = 1; j < suffixesCount; j++)
+                foreach (var currentPosition in dictionaries[0])
                 {
-                    var expectedNextResult = new DocumentPosition
+                    var currentOffset = tokens[0].DistanceToNext;
+                    for (var j = 1; j < suffixesCount; j++)
                     {
-                        Document = currentPosition.Document,
-                        RowNumber = currentPosition.RowNumber,
-                        ColNumber = currentPosition.ColNumber + currentOffset
-                    };
-                    if (!dictionaries[j].ContainsKey(expectedNextResult))
-                    {
-                        break;
-                    }
+                        var expectedNextResult = new DocumentPosition
+                        {
+                            Document = currentPosition.Document,
+                            RowNumber = currentPosition.RowNumber,
+                            ColNumber = currentPosition.ColNumber + currentOffset
+                        };
+                        if (!dictionaries[j].Contains(expectedNextResult))
+                        {
+                            break;
+                        }
 
-                    currentOffset += tokens[j].DistanceToNext;
-                    if (j == suffixesCount - 1)
-                    {
-                        resultList.Add(currentPosition);
+                        currentOffset += tokens[j].DistanceToNext;
+                        if (j == suffixesCount - 1)
+                        {
+                            resultList.Add(currentPosition);
+                        }
                     }
                 }
             }
@@ -124,12 +133,17 @@ namespace Indexer.Indexes
         private void AddTerm(string term, DocumentPosition result)
         {
             var hashCode = StringHelper.GetHashCode(term);
-            if (!this.dictionary.ContainsKey(hashCode))
+            lock (this.syncObj)
             {
-                this.dictionary.TryAdd(hashCode, new ConcurrentDictionary<DocumentPosition, byte>());
+                if (!this.dictionary.ContainsKey(hashCode))
+                {
+                    this.dictionary.Add(hashCode, new HashSet<DocumentPosition> { result });
+                }
+                else
+                {
+                    this.dictionary[hashCode].Add(result);
+                }
             }
-
-            this.dictionary[hashCode].TryAdd(result, default(byte));
         }
     }
 }
