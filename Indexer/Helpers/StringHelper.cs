@@ -1,4 +1,7 @@
-﻿namespace Indexer.Helpers
+﻿using System;
+using System.Collections.Generic;
+
+namespace Indexer.Helpers
 {
     public static class StringHelper
     {
@@ -26,6 +29,21 @@
                 }
 
                 return hash1 + hash2 * 1566083941;
+            }
+        }
+
+        public static IEnumerable<int> AllIndexesOf(string s, string substring)
+        {
+            if (string.IsNullOrEmpty(substring))
+            {
+                yield break;
+            }
+
+            var minIndex = s.IndexOf(substring, StringComparison.OrdinalIgnoreCase);
+            while (minIndex != -1)
+            {
+                yield return minIndex;
+                minIndex = s.IndexOf(substring, minIndex + substring.Length, StringComparison.OrdinalIgnoreCase);
             }
         }
     }

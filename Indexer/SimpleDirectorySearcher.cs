@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 using Indexer.Helpers;
 using Indexer.Indexes;
 
@@ -18,6 +17,12 @@ namespace Indexer
         public IList<DocumentPosition> Find(string phrase)
         {
             var result = new List<DocumentPosition>();
+            if (string.IsNullOrEmpty(phrase))
+            {
+                return result;
+            }
+
+            phrase = phrase.Trim();
             var files = FileHelper.GetAllFiles(this.filesPath);
             foreach (var file in files)
             {
@@ -25,13 +30,13 @@ namespace Indexer
 
                 foreach (var line in File.ReadLines(file.FullName))
                 {
-                    foreach (Match match in Regex.Matches(line, phrase, RegexOptions.IgnoreCase))
+                    foreach (var index in StringHelper.AllIndexesOf(line, phrase))
                     {
                         result.Add(
                             new DocumentPosition
                             {
                                 Document = file.FullName,
-                                ColNumber = match.Index + 1,
+                                ColNumber = index + 1,
                                 RowNumber = rowNumber
                             });
                     }

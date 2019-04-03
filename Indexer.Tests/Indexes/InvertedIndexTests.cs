@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using Indexer.Indexes;
-using Indexer.Tests.Base;
 using Indexer.Tokens;
 using NUnit.Framework;
 

@@ -64,6 +64,7 @@ namespace Indexer
         public void StopBuildIndex()
         {
             this.cts.Cancel();
+            // TODO: dispose observer or continue events collecting?
         }
 
         public IList<DocumentPosition> Find(string query)

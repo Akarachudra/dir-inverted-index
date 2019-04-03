@@ -75,7 +75,7 @@ namespace Indexer.Watch
         private void WatcherOnChanged(object sender, FileSystemEventArgs e)
         {
             var fullPath = e.FullPath;
-            if (this.lastChangesDictionary.ContainsKey(fullPath) && this.lastChangesDictionary[fullPath] <= DateTime.UtcNow)
+            if (this.lastChangesDictionary.ContainsKey(fullPath) && this.lastChangesDictionary[fullPath] <= DateTime.UtcNow.AddSeconds(1))
             {
                 return;
             }
