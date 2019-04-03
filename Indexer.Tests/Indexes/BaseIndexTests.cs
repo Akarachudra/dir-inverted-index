@@ -200,6 +200,22 @@ namespace Indexer.Tests.Indexes
             invertedIndex.Find("t_E_s_t").Should().BeEquivalentTo(expectedResult);
         }
 
+        [Test]
+        public void Same_Suffixes_For_First_Term()
+        {
+            const string firstPhrase = "some program";
+            const string secondPhrase = "awesome program";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(firstPhrase, 1, "doc1");
+            invertedIndex.Add(secondPhrase, 2, "doc1");
+
+            invertedIndex.Find("ome program")
+                         .Should()
+                         .BeEquivalentTo(
+                             new DocumentPosition { ColNumber = 2, RowNumber = 1, Document = "doc1" },
+                             new DocumentPosition { ColNumber = 5, RowNumber = 2, Document = "doc1" });
+        }
+
         protected abstract IInvertedIndex GetNewIndex();
     }
 }
