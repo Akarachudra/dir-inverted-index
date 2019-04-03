@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using FluentAssertions;
+using Indexer.Helpers;
 using Indexer.Indexes;
 using Indexer.Tests.Base;
 using Indexer.Tokens;
@@ -126,7 +127,7 @@ namespace Indexer.Tests
         {
             var indexService = new IndexService(
                 new InvertedIndex(new DefaultTokenizer()),
-                new DirectoryObserver(this.PathToFiles, path => true));
+                new DirectoryObserver(this.PathToFiles, FileHelper.IsTextFile));
 
             indexService.StartBuildIndex();
             File.WriteAllLines(this.FirstFilePath, new[] { "test", "number" });
