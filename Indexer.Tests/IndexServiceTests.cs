@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using FluentAssertions;
 using Indexer.Helpers;
 using Indexer.Indexes;
 using Indexer.Tests.Base;
+using Indexer.Tests.LoadTests;
 using Indexer.Tokens;
 using Indexer.Watch;
 using Moq;
@@ -157,6 +159,37 @@ namespace Indexer.Tests
             indexService.Find("nterfac")
                         .Should()
                         .BeEquivalentTo(new DocumentPosition { ColNumber = 2, Document = this.IncludedFilePath, RowNumber = 2 });
+        }
+
+        [Test]
+        public void Search_Result_Is_Same_To_SimpleSearcher()
+        {
+            File.WriteAllLines(this.FirstFilePath, TestDataGenerator.GetRandomLines(Environment.TickCount));
+            File.WriteAllLines(this.FirstFilePath, TestDataGenerator.GetRandomLines(Environment.TickCount + 50));
+            var indexService = new IndexService(
+                new InvertedIndex(new DefaultTokenizer()),
+                new DirectoryObserver(this.PathToFiles, FileHelper.IsTextFile));
+            var simpleSearcher = new SimpleDirectorySearcher(this.PathToFiles);
+
+            indexService.StartBuildIndex();
+
+            Thread.Sleep(2000);
+
+            for (var i = 0; i < 10; i++)
+            {
+                var phrase = TestDataGenerator.GetSearchPhrase(Environment.TickCount + i);
+                var stopWatch = Stopwatch.StartNew();
+                var simpleSearchResult = simpleSearcher.Find(phrase);
+                var simpleElapsed = stopWatch.Elapsed;
+                stopWatch.Restart();
+                var indexServiceResult = indexService.Find(phrase);
+                var indexElapsed = stopWatch.Elapsed;
+
+                Console.WriteLine($"Simple search elapsed: {simpleElapsed}");
+                Console.WriteLine($"Index search elapsed: {indexElapsed}");
+                simpleSearchResult.Should().BeEquivalentTo(indexServiceResult);
+                simpleElapsed.Should().BeGreaterThan(indexElapsed);
+            }
         }
     }
 }
