@@ -32,7 +32,7 @@ namespace Indexer.Tests.Base
         }
 
         [SetUp]
-        public void RunBeforeTests()
+        public virtual void RunBeforeTests()
         {
             EnsureErasedFolder(this.PathToFiles);
         }
