@@ -74,33 +74,45 @@ namespace Indexer.Watch
 
         private void WatcherOnChanged(object sender, FileSystemEventArgs e)
         {
-            if (!this.filterByPath(e.FullPath))
+            var fullPath = e.FullPath;
+            if (this.lastChangesDictionary.ContainsKey(fullPath) && this.lastChangesDictionary[fullPath] <= DateTime.UtcNow)
             {
                 return;
             }
 
-            if (this.lastChangesDictionary.ContainsKey(e.FullPath) && this.lastChangesDictionary[e.FullPath] <= DateTime.UtcNow.AddSeconds(1))
+            if (!this.IsGoodEvent(fullPath))
             {
                 return;
             }
 
-            this.lastChangesDictionary[e.FullPath] = DateTime.UtcNow;
+            this.lastChangesDictionary[fullPath] = DateTime.UtcNow;
+
             this.OnChanged(e);
         }
 
         private void WatcherOnCreated(object sender, FileSystemEventArgs e)
         {
-            if (Directory.Exists(e.FullPath))
-            {
-                return;
-            }
-
-            if (!this.filterByPath(e.FullPath))
+            if (!this.IsGoodEvent(e.FullPath))
             {
                 return;
             }
 
             this.OnCreated(e);
+        }
+
+        private bool IsGoodEvent(string fullPath)
+        {
+            if (Directory.Exists(fullPath))
+            {
+                return false;
+            }
+
+            if (!this.filterByPath(fullPath))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

@@ -42,6 +42,7 @@ namespace Indexer.Tests.Watch
 
                 observer.Created += callBackHandler;
                 observer.Start();
+                Thread.Sleep(1000);
             }
 
             callCount.Should().Be(1);
@@ -61,6 +62,7 @@ namespace Indexer.Tests.Watch
 
                 observer.Created += callBackHandler;
                 observer.Start();
+                Thread.Sleep(1000);
             }
 
             callCount.Should().Be(0);
@@ -77,6 +79,7 @@ namespace Indexer.Tests.Watch
                 observer.Created += callBackHandler;
                 callCount.Should().Be(0);
                 observer.Start();
+                Thread.Sleep(1000);
                 File.WriteAllText(this.FirstFilePath, "text");
             }
 
@@ -95,6 +98,7 @@ namespace Indexer.Tests.Watch
                 observer.Created += callBackHandler;
                 callCount.Should().Be(0);
                 observer.Start();
+                Thread.Sleep(1000);
                 File.WriteAllText(this.FirstFilePath, "text");
             }
 
@@ -107,6 +111,7 @@ namespace Indexer.Tests.Watch
         {
             var callCount = 0;
             File.WriteAllText(this.FirstFilePath, "text");
+            Thread.Sleep(500);
             var e = new List<FileSystemEventArgs>();
             using (var observer = new DirectoryObserver(this.PathToFiles, s => true))
             {
@@ -119,6 +124,7 @@ namespace Indexer.Tests.Watch
                 observer.Changed += callBackHandler;
                 callCount.Should().Be(0);
                 observer.Start();
+                Thread.Sleep(1000);
                 File.WriteAllText(this.FirstFilePath, "new text");
             }
 
@@ -138,6 +144,7 @@ namespace Indexer.Tests.Watch
                 observer.Changed += callBackHandler;
                 callCount.Should().Be(0);
                 observer.Start();
+                Thread.Sleep(1000);
                 File.WriteAllText(this.FirstFilePath, "new text");
             }
 
