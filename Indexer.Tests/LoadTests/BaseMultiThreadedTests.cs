@@ -22,13 +22,10 @@ namespace Indexer.Tests.LoadTests
             {
                 try
                 {
-                    for (var i = 0; i < 20; i++)
+                    for (var i = 0; i < 5; i++)
                     {
                         var lines = TestDataGenerator.GetRandomLines(ticks + i, 10000);
-                        for (var j = 0; j < lines.Length; j++)
-                        {
-                            index.Add(lines[j], j + 1, "some doc");
-                        }
+                        index.Add(lines, "some doc" + i);
                     }
                 }
                 catch (Exception e)
@@ -50,7 +47,7 @@ namespace Indexer.Tests.LoadTests
             {
                 try
                 {
-                    for (var i = 0; i < 50000; i++)
+                    for (var i = 0; i < 1000; i++)
                     {
                         var phrase = TestDataGenerator.GetSearchPhrase(ticks + i);
                         index.Find(phrase);

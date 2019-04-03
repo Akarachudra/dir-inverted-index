@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Indexer.Helpers;
 using Indexer.Tokens;
@@ -18,12 +19,21 @@ namespace Indexer.Indexes
             this.syncObj = new object();
         }
 
-        public void Add(string line, int rowNumber, string document)
+        public void Add(string[] lines, string document)
         {
-            var tokens = this.tokenizer.GetTokens(line);
-            foreach (var token in tokens)
+            if (string.IsNullOrWhiteSpace(document))
             {
-                this.AddToken(token, rowNumber, document);
+                throw new ArgumentException("Document could not be null or whitespace");
+            }
+
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var line = lines[i];
+                var tokens = this.tokenizer.GetTokens(line);
+                foreach (var token in tokens)
+                {
+                    this.AddToken(token, i + 1, document);
+                }
             }
         }
 
