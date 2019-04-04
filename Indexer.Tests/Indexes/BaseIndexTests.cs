@@ -249,6 +249,17 @@ namespace Indexer.Tests.Indexes
                              new DocumentPosition { RowNumber = 2, ColNumber = 4, Document = "doc1" });
         }
 
+        [Test]
+        public void Long_Search_Phrase_With_Matched_First_Suffix()
+        {
+            const string firstPhrase = "some program";
+            const string searchPhrase = "some programmmm";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(new[] { firstPhrase }, "doc1");
+
+            invertedIndex.Find(searchPhrase).Should().BeEmpty();
+        }
+
         [TestCase(null)]
         [TestCase("")]
         [TestCase("   ")]
