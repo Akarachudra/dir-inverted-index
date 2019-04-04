@@ -12,7 +12,6 @@ namespace Indexer.Indexes
         private readonly ITokenizer tokenizer;
         private readonly SuffixArray<string, List<DocumentPosition>> suffixArray;
         private readonly Dictionary<string, string[]> indexedFiles;
-        // TODO: Implement memLog on red-black tree
         private readonly IComparer<string> matchComparer;
         private readonly IComparer<string> prefixComparer;
         private readonly object syncObj;

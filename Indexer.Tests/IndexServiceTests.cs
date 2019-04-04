@@ -175,21 +175,18 @@ namespace Indexer.Tests
 
             Thread.Sleep(2000);
 
-            for (var i = 0; i < 10; i++)
-            {
-                var phrase = TestDataGenerator.GetSearchPhrase(Environment.TickCount + i);
-                var stopWatch = Stopwatch.StartNew();
-                var simpleSearchResult = simpleSearcher.Find(phrase);
-                var simpleElapsed = stopWatch.Elapsed;
-                stopWatch.Restart();
-                var indexServiceResult = indexService.Find(phrase);
-                var indexElapsed = stopWatch.Elapsed;
+            var phrase = TestDataGenerator.GetSearchPhrase(Environment.TickCount);
+            var stopWatch = Stopwatch.StartNew();
+            var simpleSearchResult = simpleSearcher.Find(phrase);
+            var simpleElapsed = stopWatch.Elapsed;
+            stopWatch.Restart();
+            var indexServiceResult = indexService.Find(phrase);
+            var indexElapsed = stopWatch.Elapsed;
 
-                Console.WriteLine($"Simple search elapsed: {simpleElapsed}");
-                Console.WriteLine($"Index search elapsed: {indexElapsed}");
-                simpleSearchResult.Should().BeEquivalentTo(indexServiceResult);
-                simpleElapsed.Should().BeGreaterThan(indexElapsed);
-            }
+            Console.WriteLine($"Simple search elapsed: {simpleElapsed}");
+            Console.WriteLine($"Index search elapsed: {indexElapsed}");
+            simpleSearchResult.Should().BeEquivalentTo(indexServiceResult);
+            simpleElapsed.Should().BeGreaterThan(indexElapsed);
         }
     }
 }
