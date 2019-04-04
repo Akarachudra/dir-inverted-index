@@ -59,10 +59,16 @@ namespace Indexer.Indexes
             }
         }
 
-        public IList<DocumentPosition> Find(string query)
+        public IList<DocumentPosition> Find(string phrase)
         {
             var emptyResult = new List<DocumentPosition>();
-            var tokens = this.tokenizer.GetTokens(query);
+            if (string.IsNullOrWhiteSpace(phrase))
+            {
+                return emptyResult;
+            }
+
+            phrase = phrase.Trim();
+            var tokens = this.tokenizer.GetTokens(phrase);
             var count = tokens.Count;
             if (count == 0)
             {
@@ -84,7 +90,7 @@ namespace Indexer.Indexes
                     return emptyResult;
                 }
 
-                return this.GetPhraseMatches(query.ToLowerInvariant(), firstList);
+                return this.GetPhraseMatches(phrase.ToLowerInvariant(), firstList);
             }
 
             return emptyResult;

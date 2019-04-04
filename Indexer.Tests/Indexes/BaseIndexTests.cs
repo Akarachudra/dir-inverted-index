@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using Indexer.Indexes;
-using Indexer.Tests.Base;
 using NUnit.Framework;
 
 namespace Indexer.Tests.Indexes
 {
     [TestFixture]
-    public abstract class BaseIndexTests : TestsBase
+    public abstract class BaseIndexTests
     {
         [TestCase(null)]
         [TestCase("")]
@@ -233,6 +232,33 @@ namespace Indexer.Tests.Indexes
                          .BeEquivalentTo(
                              new DocumentPosition { RowNumber = 1, ColNumber = 2, Document = "doc1" },
                              new DocumentPosition { RowNumber = 2, ColNumber = 5, Document = "doc1" });
+        }
+
+        [Test]
+        public void Space_Wrappers_Are_Ignored()
+        {
+            const string firstPhrase = "   some program";
+            const string secondPhrase = "awesome program ";
+            var invertedIndex = this.GetNewIndex();
+            invertedIndex.Add(new[] { firstPhrase, secondPhrase }, "doc1");
+
+            invertedIndex.Find(" some program   ")
+                         .Should()
+                         .BeEquivalentTo(
+                             new DocumentPosition { RowNumber = 1, ColNumber = 4, Document = "doc1" },
+                             new DocumentPosition { RowNumber = 2, ColNumber = 4, Document = "doc1" });
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("   ")]
+        public void Return_Empty_Result_If_Phrase_Is_Null_Or_Whitespaces(string phrase)
+        {
+            var invertedIndex = this.GetNewIndex();
+
+            invertedIndex.Find(phrase)
+                         .Should()
+                         .BeEmpty();
         }
 
         protected abstract IInvertedIndex GetNewIndex();

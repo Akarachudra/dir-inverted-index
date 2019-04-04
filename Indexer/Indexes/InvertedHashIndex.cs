@@ -37,10 +37,10 @@ namespace Indexer.Indexes
             }
         }
 
-        public IList<DocumentPosition> Find(string query)
+        public IList<DocumentPosition> Find(string phrase)
         {
             var emptyResult = new List<DocumentPosition>();
-            var tokens = this.tokenizer.GetTokens(query);
+            var tokens = this.tokenizer.GetTokens(phrase);
             var count = tokens.Count;
             if (count == 0)
             {
